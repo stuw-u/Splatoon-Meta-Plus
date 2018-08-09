@@ -74,7 +74,7 @@ class Player :
         return;
       }
 
-      byte doorCode = TilesParams_Array[world.getTile(Div8(Div8(x)+4),Div64(y)+1)*5+1];
+      byte doorCode = TilesParams_Array[world.GetTile(Div8(Div8(x)+4),Div64(y)+1)*5+1];
       if(doorCode == 12 || doorCode == 13 || doorCode == 14) {
         DoorWarning = true;
         if(gb.buttons.pressed(BUTTON_UP)) {
@@ -214,12 +214,12 @@ class Player :
       //Stairs and slopes handeling
       if(LEFT_HOLD) {
         IsSwiming = true;
-        byte col = TilesParams_Array[world.getTile(Div8(Div8(x)-1),Div8(Div8(y)+11))*TileParamsCount+0];
+        byte col = TilesParams_Array[world.GetTile(Div8(Div8(x)-1),Div8(Div8(y)+11))*TileParamsCount+0];
         if(col == 7) {
           x -= 8;
           y -= 8;
         } else if(col == 0) {
-          col = TilesParams_Array[world.getTile(Div8(Div8(x)+4),Div8(Div8(y)+16))*TileParamsCount+0];
+          col = TilesParams_Array[world.GetTile(Div8(Div8(x)+4),Div8(Div8(y)+16))*TileParamsCount+0];
           if(col == 7) {
             x -= 8;
             y -= 8;
@@ -227,12 +227,12 @@ class Player :
         }
       }
       if(RIGHT_HOLD) {
-        byte col = TilesParams_Array[world.getTile(Div8(Div8(x)+12),Div8(Div8(y)+11))*TileParamsCount+0];
+        byte col = TilesParams_Array[world.GetTile(Div8(Div8(x)+12),Div8(Div8(y)+11))*TileParamsCount+0];
         if(col == 6) {
           x += 8;
           y -= 8;
         } else if(col == 0) {
-          col = TilesParams_Array[world.getTile(Div8(Div8(x)+4),Div8(Div8(y)+16))*TileParamsCount+0];
+          col = TilesParams_Array[world.GetTile(Div8(Div8(x)+4),Div8(Div8(y)+16))*TileParamsCount+0];
           if(col == 6) {
             x += 8;
             y -= 8;
@@ -697,11 +697,11 @@ class Player :
 
         if(targetY > 0) {
           if(PlayerDir < 0) {
-            if(TilesParams_Array[world.getTile(constrain(Div8(Div8(x)+0),0,world.MapWidth-1),constrain(Div8(Div8(y))+2,0,world.MapHeight-1))*5+0] == 0) {
+            if(TilesParams_Array[world.GetTile(constrain(Div8(Div8(x)+0),0,world.MapWidth-1),constrain(Div8(Div8(y))+2,0,world.MapHeight-1))*5+0] == 0) {
               B_PRESSED = true;
             }
           } else {
-            if(TilesParams_Array[world.getTile(constrain(Div8(Div8(x)+8),0,world.MapWidth-1),constrain(Div8(Div8(y))+2,0,world.MapHeight-1))*5+0] == 0) {
+            if(TilesParams_Array[world.GetTile(constrain(Div8(Div8(x)+8),0,world.MapWidth-1),constrain(Div8(Div8(y))+2,0,world.MapHeight-1))*5+0] == 0) {
               B_PRESSED = true;
             }
           }

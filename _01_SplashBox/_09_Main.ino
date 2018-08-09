@@ -297,7 +297,7 @@ void DrawCursor() {
   
             //gb.display.setColor(RED);
             //gb.display.drawRect(toScreenX((rootX+2+driftX/SCALE)/8*8),toScreenY((rootY+2-driftY/SCALE)/8*8),8,8);
-            if(TilesParams_Array[world.getTile((rootX+2+(driftX/8))/8,(rootY+2-(driftY/8))/8)] != 0) {
+            if(TilesParams_Array[world.GetTile((rootX+2+(driftX/8))/8,(rootY+2-(driftY/8))/8)] != 0) {
               break;
             }
             
@@ -921,6 +921,12 @@ void loop () {
         gb.display.cursorY = 7;
         gb.display.print(lvlC);
 
+        gb.display.setColor((ColorIndex)9);
+        gb.display.fillRect(22, 7, (Level-floor(Level))*57, 5);
+
+        gb.display.setColor((ColorIndex)9);
+        gb.display.drawRect(22, 7, 57, 5);
+
         gb.display.setColor((ColorIndex)0);
         //gb.display.drawFastHLine(0,13,80);
         gb.display.fillRect(0,14,80,7);
@@ -1273,7 +1279,7 @@ void loop () {
           gb.display.cursorX = 50;
           gb.display.cursorY = 10;
           char ipC[5];
-          sprintf(ipC,"%05d",player.mainPlayer.InkPoints); //player.mainPlayer.InkPoints
+          sprintf(ipC,"%05d",gb.getCpuLoad()); //player.mainPlayer.InkPoints
           gb.display.print(ipC);
           gb.display.print("P");
 
@@ -1304,7 +1310,7 @@ void loop () {
             BetaScore = 0;
             for(byte x = 0; x < world.MapWidth; x++) {
               for(byte y = 0; y < world.MapHeight; y++) {
-                if(TilesParams_Array[world.getTile(x,y)*5+0] == 1) {
+                if(TilesParams_Array[world.GetTile(x,y)*5+0] == 1) {
                   if(world.SMGetColor(x,y) == 0) {
                     AlphaScore += (world.SMGetPaintValueAt(x,y,0)+world.SMGetPaintValueAt(x,y,1)+world.SMGetPaintValueAt(x,y,2)+world.SMGetPaintValueAt(x,y,3));
                   } else if(world.SMGetColor(x,y) == 1) {
@@ -1338,7 +1344,7 @@ void loop () {
             Coin = constrain(Coin+AddedCoins,0,999999);
             Level = constrain(Level+(AddedLevel*0.01F),0,99);
             gb.save.set(0, Coin);
-            gb.save.set(1, (int32_t)Level);
+            gb.save.set(1, (int32_t)(Level*100));
           }
         }
       } else {

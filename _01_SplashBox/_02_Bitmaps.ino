@@ -1749,7 +1749,7 @@ const Gamebuino_Meta::Sound_FX Hit_ND[] = {
 };
 
 const Gamebuino_Meta::Sound_FX BulletS[] = {
-  {Gamebuino_Meta::Sound_FX_Wave::NOISE,0,136,-11,0,64,2},
+  {Gamebuino_Meta::Sound_FX_Wave::NOISE,0,25,-11,0,64,2},
 };
 
 const Gamebuino_Meta::Sound_FX Shoot[] = {
