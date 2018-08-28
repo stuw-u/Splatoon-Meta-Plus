@@ -756,7 +756,7 @@ void loop () {
         gb.display.cursorX = 1;
         gb.display.cursorY = 1;
         gb.display.setColor((ColorIndex)0);
-        gb.display.print("SALMON RUN IS\n CLOSED.\n\n COME BACK LATER\n ONCE THE UPDATE\n IS OUT.");
+        gb.display.print("GO AWAY\n THERE'S NOTHING\n TO SEE HERE.");
         
         if(gb.buttons.pressed(BUTTON_MENU)) {
           AnimationTimer = STARTLENGHT2;
@@ -1279,7 +1279,7 @@ void loop () {
           gb.display.cursorX = 50;
           gb.display.cursorY = 10;
           char ipC[5];
-          sprintf(ipC,"%05d",gb.getCpuLoad()); //player.mainPlayer.InkPoints
+          sprintf(ipC,"%05d",player.mainPlayer.InkPoints); //player.mainPlayer.InkPoints
           gb.display.print(ipC);
           gb.display.print("P");
 
@@ -1288,7 +1288,7 @@ void loop () {
           gb.display.drawRect(74,54,5,7);
           
           byte fillsize = player.mainPlayer.Refill*7/100;
-          gb.display.fillRect(74,62,5,-fillsize);
+          gb.display.fillRect(74,61,5,-fillsize);
           gb.display.setColor((ColorIndex)10);
           gb.display.drawFastHLine(74,54,5);
           gb.display.drawFastHLine(74,62,5);
