@@ -461,7 +461,7 @@ class Particle {
       }
     }
     
-    if(timer <= 0 || (x < cameraX || x > cameraX+LCDWIDTH || y < cameraY || y > cameraY+LCDHEIGHT)) {
+    if(timer <= 0 || ((x < cameraX || x > cameraX+LCDWIDTH || y < cameraY || y > cameraY+LCDHEIGHT) && type != 8)) {
       Destroy();
     }
     Draw();

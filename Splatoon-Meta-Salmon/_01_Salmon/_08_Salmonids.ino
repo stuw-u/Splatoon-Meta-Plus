@@ -23,6 +23,7 @@ class Salmonid:
   //6: Flying asshole
   //7: Robot guy
   //8: The one with a bomb on his head
+  //9: Tower
   
   virtual int16_t getYBounce() {
     return 40;

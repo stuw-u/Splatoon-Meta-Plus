@@ -186,6 +186,8 @@ class World {
   }
 
   byte GetTile(int16_t x, int16_t y){
+    //2,1 -- 3,0 -- 3,1 Flip TileGround and tiles
+    
     if(x<0||y<0||x>=MaxMapW||y>=MaxMapH) {
       return 1;
     }
@@ -194,7 +196,25 @@ class World {
     if(Theme == 0) {
       return TileGroup;
     } else if(Theme > 0) {
-      return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
+      if(x/5 > (MapWidth/10)) {
+        bool DoIt = false;
+        if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 2) {
+          if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 26] == 1) {
+            DoIt = true;
+          }
+        }
+        if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 3) {
+          DoIt = true;
+        }
+
+        if(DoIt) {
+          return FlipTile(Themes[Theme-1][1+TileGroup * TilesGroupCount + ((4-(x%5)) + (y%5) * 5)]);
+        } else {
+          return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
+        }
+      } else {
+        return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
+      }
     }
   }
 
@@ -285,6 +305,7 @@ class World {
     for(int16_t y = yMin; y < yMax; y++) {
       for(int16_t x = xMin; x < xMax; x++ ) {
         byte gt = GetTile(x,y);
+        byte gc = TilesParams_Array[gt*TileParamsCount+0];
         if(gt == 0 || Mul8(y) >= MapHeight*8-(WaterLevel-8)) {
           continue;
         }
@@ -296,7 +317,7 @@ class World {
           continue;
         }
         
-        if(TilesParams_Array[gt*TileParamsCount+0] == 1 && SMGetRaw(x,y) != 0) {
+        if(gc > 0) {
           cC = SMGetColor(x,y);
           V1 = SMGetPaintValueAt(x,y,0);
           V3 = SMGetPaintValueAt(x,y,1);
@@ -311,30 +332,33 @@ class World {
                 } 
                 if(TilesParams_Array[GetTile(x+x1,y+y1)*5+0] == 0) {
 
-                  randomSeed((x+y*MaxMapW) + (x1+y1*8));
-
                   //Ink
                   if(cC == 0) {
                     gb.display.setColor((ColorIndex)7);
                   } else {
                     gb.display.setColor((ColorIndex)9);
                   }
-                  
-                  if(x1<0) {
-                    if(y1==0) {
-                      gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V7*random(1,4)], ROTCCW, NOFLIP);
+
+                  randomSeed((x+y*MaxMapW) + (x1+y1*8));
+                  byte ii = getInkIndex(gc,x1,-y1);
+
+                  if(gc != 10) {
+                    if(x1<0) {
+                      if(y1==0) {
+                        gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V7*ii], getRot(gc,x1,y1,ii), getFlip(gc,x1,-y1,ii));
+                      }
                     }
-                  }
-                  if(x1>0) {
-                    if(y1==0) {
-                      gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V3*random(1,4)], ROTCW, NOFLIP);
+                    if(x1>0) {
+                      if(y1==0) {
+                        gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V3*ii], getRot(gc,x1,y1,ii), getFlip(gc,x1,-y1,ii));
+                      } 
                     }
-                  }
-                  if(x1==0) {
-                    if(y1<0) {
-                      gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V1*random(1,4)], NOROT, NOFLIP);
-                    } else if(y1>0) {
-                      gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V5*random(1,4)], ROT180, NOFLIP);
+                    if(x1==0) {
+                      if(y1<0) {
+                        gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V1*ii], getRot(gc,x1,y1,ii), getFlip(gc,x1,-y1,ii));
+                      } else if(y1>0) {
+                        gb.display.drawBitmap(Mul8(x) - cameraX, Mul8(y) - cameraY, Ink[V5*ii], getRot(gc,x1,y1,ii), getFlip(gc,x1,-y1,ii));
+                      }
                     }
                   }
                 }
@@ -426,6 +450,14 @@ class World {
     for(int8_t x = 0; x < MapTileGroupW; x++) {
       for(int8_t y = 0; y < MapTileGroupH; y++) {
         //Current Block is Available
+        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x-1>=0 && y+1<MapTileGroupH) {
+          //The block to the < is ground
+          //The block bellow is ground
+          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
+            //Set to partial
+            mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
+          }
+        } else
         if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x+1<MapTileGroupW && y+1<MapTileGroupH) {
           //The block to the > is ground
           //The block bellow is ground
@@ -438,14 +470,6 @@ class World {
                 mapTileGroups[x][y] = 4;
               }
             }
-          }
-        }
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x-1>=0 && y+1<MapTileGroupH) {
-          //The block to the < is ground
-          //The block bellow is ground
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-            //Set to partial
-            mapTileGroups[x][y] = 4;
           }
         }
       }

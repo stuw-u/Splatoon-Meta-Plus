@@ -4,21 +4,13 @@
 const char* randomC = "ABCDEFGHIJKLMNOPQRSTUVWYZ1234567890_#@$%";
 
 const char* enText[] = {
-  "PAUSE",
-  "CONTINUER",
-  "QUITTER",
-  "RECOMMENCER",
-  "MARQUER LA ZONE...",
-  "FAVORITE",
-  "IMPOSSIBLE"
-  
-  /*"PAUSED",
+  "PAUSED",
   "CONTINUE",
   "RETURN TO MAP",
   "RESART MISSION",
   "MARK AREA AS...",
   "FAVORITE",
-  "BROKEN"*/
+  "BROKEN"
 };
 
 const char* frText[] = {
@@ -26,7 +18,7 @@ const char* frText[] = {
   "CONTINUER",
   "QUITTER",
   "RECOMMENCER",
-  "MARQUER LA ZONE..."
+  "MARQUER LA ZONE...",
   "FAVORITE",
   "IMPOSSIBLE"
 };
@@ -1067,6 +1059,239 @@ const byte SCorner4[] =
   B00000000
 };
 
+byte FlipTile (byte Tile) {
+  if(Tile == 0) {
+    return Tile;
+  }
+  if(Tile == 1) {
+    return Tile;
+  }
+  
+  if(Tile == 30) {
+    return 31;
+  } else if(Tile == 31) {
+    return 30;
+  }
+
+  if(Tile == 32) {
+    return 33;
+  } else if(Tile == 33) {
+    return 32;
+  }
+
+  if(Tile == 42) {
+    return 45;
+  } else if(Tile == 45) {
+    return 42;
+  }
+
+  if(Tile == 44) {
+    return 47;
+  } else if(Tile == 47) {
+    return 4;
+  }
+
+  if(Tile == 49) {
+    return 51;
+  } else if(Tile == 51) {
+    return 49;
+  }
+
+  if(Tile == 59) {
+    return 63;
+  } else if(Tile == 63) {
+    return 59;
+  }
+
+  if(Tile == 60) {
+    return 62;
+  } else if(Tile == 62) {
+    return 60;
+  }
+
+  if(Tile == 65) {
+    return 66;
+  } else if(Tile == 6) {
+    return 65;
+  }
+
+  if(Tile == 69) {
+    return 71;
+  } else if(Tile == 71) {
+    return 69;
+  }
+
+  if(Tile == 70) {
+    return 72;
+  } else if(Tile == 72) {
+    return 70;
+  }
+
+  if(Tile == 74) {
+    return 75;
+  } else if(Tile == 75) {
+    return 74;
+  }
+
+  if(Tile == 81) {
+    return 83;
+  } else if(Tile == 83) {
+    return 81;
+  }
+
+  if(Tile == 84) {
+    return 86;
+  } else if(Tile == 86) {
+    return 84;
+  }
+
+  if(Tile == 88) {
+    return 90;
+  } else if(Tile == 90) {
+    return 88;
+  }
+
+  if(Tile == 89) {
+    return 91;
+  } else if(Tile == 91) {
+    return 89;
+  }
+
+  if(Tile == 92) {
+    return 96;
+  } else if(Tile == 96) {
+    return 92;
+  }
+
+  if(Tile == 93) {
+    return 97;
+  } else if(Tile == 97) {
+    return 93;
+  }
+
+  if(Tile == 106) {
+    return 109;
+  } else if(Tile == 109) {
+    return 106;
+  }
+
+  if(Tile == 107) {
+    return 110;
+  } else if(Tile == 110) {
+    return 107;
+  }
+
+  if(Tile == 108) {
+    return 111;
+  } else if(Tile == 111) {
+    return 108;
+  }
+
+  if(Tile == 112) {
+    return 114;
+  } else if(Tile == 114) {
+    return 112;
+  }
+
+  if(Tile == 113) {
+    return 115;
+  } else if(Tile == 115) {
+    return 113;
+  }
+
+  if(Tile == 123) {
+    return 125;
+  } else if(Tile == 125) {
+    return 123;
+  }
+
+  if(Tile == 129) {
+    return 135;
+  } else if(Tile == 135) {
+    return 129;
+  }
+
+  if(Tile == 130) {
+    return 136;
+  } else if(Tile == 136) {
+    return 130;
+  }
+
+  if(Tile == 131) {
+    return 137;
+  } else if(Tile == 137) {
+    return 131;
+  }
+
+  if(Tile == 139) {
+    return 145;
+  } else if(Tile == 145) {
+    return 139;
+  }
+
+  if(Tile == 140) {
+    return 146;
+  } else if(Tile == 146) {
+    return 140;
+  }
+
+  if(Tile == 147) {
+    return 153;
+  } else if(Tile == 153) {
+    return 147;
+  }
+
+  if(Tile == 148) {
+    return 154;
+  } else if(Tile == 154) {
+    return 148;
+  }
+
+  if(Tile == 149) {
+    return 155;
+  } else if(Tile == 155) {
+    return 149;
+  }
+
+  if(Tile == 156) {
+    return 158;
+  } else if(Tile == 158) {
+    return 156;
+  }
+
+  if(Tile == 159) {
+    return 161;
+  } else if(Tile == 161) {
+    return 159;
+  }
+
+  if(Tile == 161) {
+    return 163;
+  } else if(Tile == 163) {
+    return 161;
+  }
+
+  if(Tile == 164) {
+    return 166;
+  } else if(Tile == 166) {
+    return 164;
+  }
+
+  if(Tile == 168) {
+    return 170;
+  } else if(Tile == 170) {
+    return 168;
+  }
+
+  if(Tile == 182) {
+    return 183;
+  } else if(Tile == 183) {
+    return 182;
+  }
+  
+  return Tile;
+}
+
 const uint16_t Tiles_Array[] = {
   9, 9, 254, 0, 0x0801, 0,
   0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,0x801,
@@ -1260,7 +1485,113 @@ const uint16_t Tiles_Array[] = {
 };
 Image Tiles = Image(Tiles_Array);
 
+byte getRot(byte collider, int8_t dirX, int8_t dirY, byte inkIndex) {
+  if(inkIndex != 1 && inkIndex != 2 && inkIndex != 3) {
+    return NOROT;
+  }
+  if(dirX<0) {
+    if(dirY==0) {
+      return ROTCCW;
+    }
+  }
+  if(dirX>0) {
+    if(dirY==0) {
+      return ROTCW;
+    } 
+  }
+  if(dirX==0) {
+    if(dirY<0) {
+      return NOROT;
+    } else if(dirY>0) {
+      return ROT180;
+    }
+  }
+}
 
+byte getFlip(byte collider, int8_t dirX, int8_t dirY, byte inkIndex) {
+  if(inkIndex == 1 || inkIndex == 2 || inkIndex == 3) {
+    return NOFLIP;
+  }
+  if(collider == 2 || collider == 6) {
+    return NOFLIP;
+  }
+  if(collider == 3 || collider == 7) {
+    //return FLIPV;
+    return FLIPH;
+  }
+  if(collider == 4 || collider == 8) {
+    //return FLIPH;
+    return FLIPV;
+  }
+  if(collider == 5 || collider == 9) {
+    return FLIPVH;
+  }
+  return 0;
+}
+
+byte getInkIndex(byte collider, int8_t dirX, int8_t dirY) {
+  if(collider == 1) {
+    return random(1,4);
+  } else if(collider >= 2 && collider <= 5) {
+
+
+    if(dirY == -1 && (collider == 2 || collider == 3)) {
+      return random(1,4);
+    } else if(dirY == 1 && (collider == 2 || collider == 3)) {
+      return 4;
+    }
+    if(dirY == 1 && (collider == 4 || collider == 5)) {
+      return random(1,4);
+    } else if(dirY == -1 && (collider == 4 || collider == 5)) {
+      return 4;
+    }
+
+    
+    
+    if(dirX == 1 && (collider == 2 || collider == 4)) {
+      return random(1,4);
+    } else if(dirX == -1 && (collider == 2 || collider == 4)) {
+      return 5;
+    }
+    if(dirX == -1 && (collider == 3 || collider == 5)) {
+      return random(1,4);
+    } else if(dirX == 1 && (collider == 3 || collider == 5)) {
+      return 5;
+    }
+
+    
+  } else if(collider >= 6 && collider <= 9) {
+
+    
+    if(dirY == -1 && (collider == 6 || collider == 7)) {
+      return random(1,4);
+    } else if(dirY == 1 && (collider == 6 || collider == 7)){
+      return 6;
+    }
+    if(dirY == 1 && (collider == 8 || collider == 9)) {
+      return random(1,4);
+    } else if(dirY == -1 && (collider == 8 || collider == 9)) {
+      return 6;
+    }
+
+
+    
+    if(dirX == 1 && (collider == 6 || collider == 8)) {
+      return random(1,4);
+    } else if(dirX == -1 && (collider == 6 || collider == 8)) {
+      return 6;
+    }
+    if(dirX == -1 && (collider == 7 || collider == 9)) {
+      return random(1,4);
+    } else if(dirX == 1 && (collider == 7 || collider == 9)) {
+      return 6;
+    }
+
+    
+  } else {
+    return 0;
+  }
+}
 
 #define TileParamsCount 5
 //0: Collision (0;NoCollision, 1;Collision, 2/3/4/5;StairTopLeft/Right/Bottom, 6/7/8/9;SlopeTopLeft/Right/Bottom, 10;Slab)
@@ -1502,7 +1833,7 @@ const uint8_t Ink_1[] = {
 };
 
 const uint8_t Ink_2[] = {
-  8, 8,
+  8,8,
   B11111111,
   B10111011,
   B00011010,
@@ -1513,11 +1844,52 @@ const uint8_t Ink_2[] = {
   B00000000
 };
 
+const uint8_t Ink_TopStairs[] = {
+  8,8,
+  B00001111,
+  B00000110,
+  B00000000,
+  B00000000,
+  B11110000,
+  B01100000,
+  B01000000,
+  B00000000
+};
+
+const uint8_t Ink_SideStairs[] = {
+  8,8,
+  B00001100,
+  B00001110,
+  B00001100,
+  B00001000,
+  B10000000,
+  B11100000,
+  B11000000,
+  B10000000
+};
+
+const uint8_t Ink_Diagonal[] = {
+  8,8,
+  B00000001,
+  B00000011,
+  B00000111,
+  B00001101,
+  B00011101,
+  B00110100,
+  B01010000,
+  B11000100
+};
+
+
+
 const byte* Ink[] = {
   Empty,
   Ink_0,
   Ink_1,
-  Ink_2
+  Ink_2,
+  Ink_TopStairs,
+  Ink_SideStairs,
+  Ink_Diagonal
 };
 
 
@@ -1730,14 +2102,6 @@ const uint8_t PortT[] = {
   0,92,94,96,0,
   0,93,95,97,0,
   1,0,
-
-  //4: Partial Support 0
-  35,0,0,0,35,
-  120,0,0,0,120,
-  123,124,124,124,125,
-  121,0,0,0,121,
-  122,0,0,0,122,
-  2,0,
 
   //5: Partial Support 2
   0,0,0,0,0,
@@ -2026,7 +2390,7 @@ const uint8_t ConstructionT[] {
   0,0,0,120,0,
   0,123,124,121,125,
   0,122,0,122,0,
-  2,1,
+  3,1,
   
   0,0,0,0,0,
   0,0,0,0,0,

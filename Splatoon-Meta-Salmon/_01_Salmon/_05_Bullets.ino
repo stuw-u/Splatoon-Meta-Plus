@@ -114,33 +114,33 @@ class Bullets:
         
         for(int8_t xv = -1; xv < 2; xv++) {
           for(int8_t yv = -1; yv < 2; yv++) {
-            if(((Div8(inkX+xv*4) == constrain(Div8(inkX+xv*4),0,world.MapWidth-1))&&(Div8(inkY+yv*4) == constrain(Div8(inkY+yv*4),0,world.MapWidth-1))) && TilesParams_Array[world.GetTile(Div8(inkX+xv*4),Div8(inkY+yv*4))*TileParamsCount+0] == 1) {
+            if(((Div8(inkX+xv*4) == constrain(Div8(inkX+xv*4),0,world.MapWidth-1))&&(Div8(inkY+yv*4) == constrain(Div8(inkY+yv*4),0,world.MapWidth-1))) && TilesParams_Array[world.GetTile(Div8(inkX+xv*4),Div8(inkY+yv*4))*TileParamsCount+0] > 0) {
               
-              V0 = world.SMGetPaintValueAt(Div8(inkX+xv*4),Div8(inkY+yv*4),0);
-              V1 = world.SMGetPaintValueAt(Div8(inkX+xv*4),Div8(inkY+yv*4),1);
-              V2 = world.SMGetPaintValueAt(Div8(inkX+xv*4),Div8(inkY+yv*4),2);
-              V3 = world.SMGetPaintValueAt(Div8(inkX+xv*4),Div8(inkY+yv*4),3);
+              V0 = world.SMGetPaintValueAt(Div8(inkX+xv*6),Div8(inkY+yv*6),0);
+              V1 = world.SMGetPaintValueAt(Div8(inkX+xv*6),Div8(inkY+yv*6),1);
+              V2 = world.SMGetPaintValueAt(Div8(inkX+xv*6),Div8(inkY+yv*6),2);
+              V3 = world.SMGetPaintValueAt(Div8(inkX+xv*6),Div8(inkY+yv*6),3);
               
               if(xv==-1 && yv==0) {
-                if(world.GetTile(Div8(inkX-4),Div8(inkY+0)) != 0) {
+                if(world.GetTile(Div8(inkX-6),Div8(inkY+0)) != 0) {
                   V1 = 1;
                   //AddPointToPlayer(Owner,V1-world.SMGetPaintValueAt(Div8(inkX-4),Div8(inkY),1));
                 }
               }
               if(xv==1 && yv==0) {
-                if(world.GetTile(Div8(inkX+4),Div8(inkY+0)) != 0) {
+                if(world.GetTile(Div8(inkX+6),Div8(inkY+0)) != 0) {
                   V3 = 1;
                   //AddPointToPlayer(Owner,V3-world.SMGetPaintValueAt(Div8(inkX+4),Div8(inkY),3));
                 }
               }
               if(yv==1 && xv==0) {
-                if(world.GetTile(Div8(inkX+0),Div8(inkY+4)) != 0) {
+                if(world.GetTile(Div8(inkX+0),Div8(inkY+6)) != 0) {
                   V0 = 1;
                   //AddPointToPlayer(Owner,V0-world.SMGetPaintValueAt(Div8(inkX),Div8(inkY+4),0));
                 }
               }
               if(yv==-1 && xv==0) {
-                if(world.GetTile((inkX+0)/8,(inkY-4)/8) != 0) {
+                if(world.GetTile((inkX+0)/8,(inkY-6)/8) != 0) {
                   V2 = 1;
                   //AddPointToPlayer(Owner,V2-world.SMGetPaintValueAt(Div8(inkX),Div8(inkY-4),2));
                 }
@@ -151,8 +151,8 @@ class Bullets:
                 V1,
                 V2,
                 V3,
-                constrain(Div8(inkX+xv*4),0,world.MapWidth-1),
-                constrain(Div8(inkY+yv*4),0,world.MapHeight-1),
+                constrain(Div8(inkX+xv*6),0,world.MapWidth-1),
+                constrain(Div8(inkY+yv*6),0,world.MapHeight-1),
                 color
               );
             }
