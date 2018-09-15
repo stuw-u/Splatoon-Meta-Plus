@@ -1,8 +1,20 @@
+///WAVE LOOKUP TABLE!!!!
+
+
+
 // INITIALIZATION
 /////////////////
 
 #include <Gamebuino-Meta.h>
 #include <math.h>
+
+//Save stuff
+
+//0: Coin
+//2: Level
+//3: WeaponId
+//4: WeaponIdSalmon
+//5: Missions Unlocked (Byte, Each bit represed 1 mission)
 
 extern const uint8_t SquidSquare[];
 
@@ -59,23 +71,29 @@ int16_t cameraX, cameraY, shakeTimeLeft, shakeAmplitude;
 
 uint8_t cpuLoad = 0;
 uint8_t lastLoad[8];
+uint8_t difficulty = 0;
 
 //UI and Screen parameters
-bool IsPlaying = true; //Starts game (GameState define mode, 0:Classic, 1:Rainmaker, 2:Zones, 3:Tower, 4:Clam, 5:SalmonRun)
+bool IsPlaying = false;//true; //Starts game (GameState define mode, 0:Classic, 1:Rainmaker, 2:Zones, 3:Tower, 4:Clam, 5:SalmonRun)
 uint8_t GameState = 0; //0: TitleScreen, //1: Inkopolis, //2: WeaponShop, //3: HatShop, //4: GearSelect, //5: PlaySelection, //6: SalmonRunSelection, //7: CharSelect
-bool FreezePlayers = true;
+bool FreezePlayers = false;
+bool TutorialMode = false;
 int16_t AnimationTimer;
 int32_t AnimationTimer2;
 int32_t AnimationTimer3;
 int32_t AnimationTimer4;
 int32_t AnimationTimer5;
+int32_t AnimationTimer6;
+int32_t AnimationTimer7;
+int32_t AnimationTimer8;
+bool PartialRendering = false;
 
 bool IsPaused = false;
 int32_t PausedTimer = 0;
 byte PausedSelection = 0;
 
-byte SelectedGender = 0; //0: F, 1: M, 2: N/A
-byte SelectedHaircut = 4; //4: N/A
+byte SelectedGender = 2; //0: F, 1: M, 2: N/A
+byte SelectedHaircut = 6; //4: N/A
 
 bool LastDirection = true;
 byte curX = 48;
@@ -96,6 +114,63 @@ long AlphaScore = 0;
 long BetaScore = 0;
 byte AddedCoins = 0;
 byte AddedLevel = 0;
+
+Color paletteFlipBlackGrey[] = {  
+  (Color)0xf779, //(Color)0xf779 White
+  (Color)0x2923, //(Color)0xacd0 Grey
+  (Color)0x730b, //(Color)0x730b Dark Grey
+  (Color)0xacd0, //(Color)0x2923 Black
+  (Color)0xb15a, //(Color)0xb15a Purple
+  (Color)0xc9ae, //(Color)0xc9ae Magenta
+  (Color)0xe985, //(Color)0xe985 Red
+  (Color)0xfc03, //(Color)0xfc03 Orange
+  (Color)0xf5a2, //(Color)0xf5a2 Yellow
+  (Color)0x8624, //(Color)0x8624 Green
+  (Color)0x34a4, //(Color)0x34a4 Dark Green
+  (Color)0x3291, //(Color)0x3291 Dark Blue
+  (Color)0x3415, //(Color)0x3415 Blue
+  (Color)0x461b, //(Color)0x461b Light Blue
+  (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
+  (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
+};
+
+Color paletteFade0[] = {  
+  (Color)0x3415, //(Color)0xf779 White
+  (Color)0xacd0, //(Color)0xacd0 Grey
+  (Color)0x730b, //(Color)0x730b Dark Grey
+  (Color)0x2923, //(Color)0x2923 Black
+  (Color)0xb15a, //(Color)0xb15a Purple
+  (Color)0xc9ae, //(Color)0xc9ae Magenta
+  (Color)0xe985, //(Color)0xe985 Red
+  (Color)0xfc03, //(Color)0xfc03 Orange
+  (Color)0xf5a2, //(Color)0xf5a2 Yellow
+  (Color)0x8624, //(Color)0x8624 Green
+  (Color)0x34a4, //(Color)0x34a4 Dark Green
+  (Color)0x3291, //(Color)0x3291 Dark Blue
+  (Color)0x3291, //(Color)0x3415 Blue
+  (Color)0x3291, //(Color)0x461b Light Blue
+  (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
+  (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
+};
+
+Color paletteFade1[] = {  
+  (Color)0x461b, //(Color)0xf779 White
+  (Color)0xacd0, //(Color)0xacd0 Grey
+  (Color)0x730b, //(Color)0x730b Dark Grey
+  (Color)0x2923, //(Color)0x2923 Black
+  (Color)0xb15a, //(Color)0xb15a Purple
+  (Color)0xc9ae, //(Color)0xc9ae Magenta
+  (Color)0xe985, //(Color)0xe985 Red
+  (Color)0xfc03, //(Color)0xfc03 Orange
+  (Color)0xf5a2, //(Color)0xf5a2 Yellow
+  (Color)0x8624, //(Color)0x8624 Green
+  (Color)0x34a4, //(Color)0x34a4 Dark Green
+  (Color)0x3291, //(Color)0x3291 Dark Blue
+  (Color)0x3291, //(Color)0x3415 Blue
+  (Color)0x3415, //(Color)0x461b Light Blue
+  (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
+  (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
+};
 
 Color palette[] = {  
   (Color)0xf779, //(Color)0xf779 White

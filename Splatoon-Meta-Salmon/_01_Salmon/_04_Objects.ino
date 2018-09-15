@@ -199,7 +199,8 @@ class Object {
     }
   }
 
-  void UpdateCollision (byte t) {
+  void UpdateCollision (byte c) {
+    byte t = c;
     //Finds how much pixel you need to move
     int16_t pxXr = vx/VFORCE; //pixel on X axis require to move
     int8_t dirX = vx > 0 ? 1 : -1;
@@ -212,11 +213,17 @@ class Object {
   
     //Loops for each move iteration
     for(byte i = 0; i < pxr; i++) {
+      t = c;
   
       //Finds what axis it should do first
       if(pxYr != 0) {
   
         //Check if there's nothing next to the object
+        if(dirY > 0 && c == 2) {
+          
+        } else if(c == 2) {
+          c = 1;
+        }
         if(CheckForCollisionY(dirY, t)) {
   
           //If nothing is here, find in what direction the object need to move
@@ -256,6 +263,9 @@ class Object {
       } else {
   
         //Check if there's nothing next to the object
+        if(c == 2) {
+          c = 1;
+        }
         if(CheckForCollisionX(dirX, t)) {
   
           //If nothing is here, find in what direction the objects need to move
@@ -327,6 +337,26 @@ class Object {
     
     if(Collide) {
       UpdateCollision(1);
+    } else {
+      x -= vx/VFORCE;
+      y -= vy/VFORCE;
+    }
+  }
+
+  void HyperCleanUpdate (bool Collide) {
+    collided = false;
+    
+    IsGroundedLeft = false;
+    IsGroundedRight = false;
+    IsGroundedDown = false;
+    IsGroundedUp = false;
+    vy -= getGravity()/VFORCE;
+    vy = constrain(vy, -255, 255);
+    vx = (vx * (1000 - getXFriction())) / 1000;
+    vy = (vy * (1000 - getYFriction())) / 1000;
+    
+    if(Collide) {
+      UpdateCollision(2);
     } else {
       x -= vx/VFORCE;
       y -= vy/VFORCE;
@@ -506,4 +536,3 @@ class ParticleManager {
 };
 
 ParticleManager particleManager;
-

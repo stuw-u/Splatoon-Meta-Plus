@@ -34,7 +34,7 @@ class Egg:
     }
   };
 
-  boolean isOffScreenEgg() {
+  bool isOffScreenEgg() {
     return (toScreenX(Div8(x-3)) + toScreenX(Div8(x) + 7) < 0) || (toScreenX(Div8(x)) > LCDWIDTH) || (toScreenY(Div8(y) - 7) + toScreenY(Div8(y-3) + 7 - 6) < 0) || (toScreenY(Div8(y) - 6) > LCDHEIGHT);
   }
   
@@ -42,7 +42,11 @@ class Egg:
     if(type == 0 && !collected) {
       vx = 40*dir;
     }
-    Object::Update();
+    if(!collected) {
+      Object::Update();
+    } else {
+      Object::CleanUpdate(false);
+    }
     Draw();
     if(IsGroundedLeft) {
       dir = -1;
@@ -57,10 +61,19 @@ class Egg:
     if(Div8(y) >= world.MapHeight*8-(world.WaterLevel) && !collected) {
       Kill();
     }
-    if(Div64(x) == 36 && type == 0 && collected) {
+    if(Div64(x) == 36 && type == 0 && collected && !TutorialMode) {
       Kill();
       world.FlagEggs++;
       playSFX(2,1);
+    }
+    if(Div64(x) == 22 && type == 0 && collected && TutorialMode) {
+      Kill();
+      world.FlagEggs++;
+      playSFX(2,1);
+    }
+
+    if(type == 2 || type == 3) {
+      vy = -15;
     }
     
     timer--;

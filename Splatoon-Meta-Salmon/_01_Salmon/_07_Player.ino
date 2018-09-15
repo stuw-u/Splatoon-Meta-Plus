@@ -138,11 +138,11 @@ class Player :
       && world.SMGetColor(constrain(Div8(Div8(x)+4),0,world.MapWidth-1),constrain(Div64(y)+2,0,world.MapHeight-1)) == PlayerColor;
 
       if(BottomInk) {
-        if(AnimationTimer2%8==0) {
+        if(world.WaterWave%8==0) {
           Live = constrain(Live+1,0,100);
         }
       } else {
-        if(AnimationTimer2%10==0) {
+        if(world.WaterWave%10==0) {
           Live = constrain(Live+1,0,100);
         }
       }
@@ -266,10 +266,10 @@ class Player :
             gb.lights.drawPixel(1,3);
           }
           
-          if(AnimationTimer2%2==0) {
+          if(world.WaterWave%2==0) {
             Live = constrain(Live+1,0,100);
           }
-          if(AnimationTimer2%1==0) {
+          if(world.WaterWave%1==0) {
             Refill = constrain(Refill+2,0,100);
           }
           if(LVelY == 0) {
@@ -295,18 +295,18 @@ class Player :
         }
 
         if(LeftInk&&LEFT_HOLD) {
-          if(AnimationTimer2%2==0) {
+          if(world.WaterWave%2==0) {
             Live = constrain(Live+1,0,100);
           }
-          if(AnimationTimer2%1==0) {
+          if(world.WaterWave%1==0) {
             Refill = constrain(Refill+2,0,100);
           }
           LVelX = constrain(LVelX-1, -4, 4);
         } else if(RightInk&&RIGHT_HOLD) {
-          if(AnimationTimer2%2==0) {
+          if(world.WaterWave%2==0) {
             Live = constrain(Live+1,0,100);
           }
-          if(AnimationTimer2%1==0) {
+          if(world.WaterWave%1==0) {
             Refill = constrain(Refill+2,0,100);
           }
           LVelX = constrain(LVelX+1, -4, 4);
@@ -474,6 +474,11 @@ class Player :
         } else {
           vy = PJumpForce;
         }
+
+        if(AnimationTimer6 == 0 && AnimationTimer7 == 1) {
+          AnimationTimer6 = 1;
+          AnimationTimer7 = 0;
+        }
       }
       
       if(B_PRESSED && Object::IsGroundedRight && !Object::IsGroundedDown  && !A_HOLD) { 
@@ -552,7 +557,7 @@ class Player :
     }
 
     void Draw () {
-      if(isOffScreen())
+      if(isOffScreen() || PartialRendering)
         return; //skip boxes which are out of the screen
       
       int8_t sizeX = InklingF.width();
@@ -824,7 +829,11 @@ class Player :
     
     void Update () {
       if(Live < 0) {
-        Die();
+        if(TutorialMode) {
+          Live = 1;
+        } else {
+          Die();
+        }
       } else if(RespawnTimer > 0) {
         RespawnTimer--;
         if(RespawnTimer == 0) {
@@ -896,13 +905,24 @@ class PlayersOperator {
   void UpdateGlobal () {
     for(int16_t i = 0; i < PLAYER_C; i++) {
       if(i == 0) {
-        if(Div64(mainPlayer.x) == 36 && !world.FlagSet) {
+        if(Div64(mainPlayer.x) == 36 && !world.FlagSet && !TutorialMode) {
           playSFX(7,0);
           world.FlagSet = true;
           world.FlagWave = -5;
           particleManager.spawnParticle(world.MapWidth*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
         }
-        if(Div64(mainPlayer.x) == 37 && mainPlayer.HasGoldenEgg) {
+        if(Div64(mainPlayer.x) == 22 && !world.FlagSet && TutorialMode) {
+          playSFX(7,0);
+          world.FlagSet = true;
+          world.FlagWave = -5;
+          particleManager.spawnParticle(45*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
+        }
+        if(Div64(mainPlayer.x) == 37 && mainPlayer.HasGoldenEgg && !TutorialMode) {
+          playSFX(2,1);
+          mainPlayer.HasGoldenEgg = false;
+          world.FlagGolden++;
+        }
+        if(Div64(mainPlayer.x) == 23 && mainPlayer.HasGoldenEgg && TutorialMode) {
           playSFX(2,1);
           mainPlayer.HasGoldenEgg = false;
           world.FlagGolden++;
@@ -1033,4 +1053,3 @@ void AddPointToPlayer(byte playerCode, byte points) {
     player.players[playerCode-1].InkPoints+=points;
   }
 }
-

@@ -35,8 +35,13 @@ int ClampInt (int minv, int16_t maxv, int16_t value) {
     return value;
 }
 
-boolean isOffScreen(int16_t x, int16_t y, byte width, byte height) {
+
+bool isOffScreen(int16_t x, int16_t y, byte width, byte height) {
   return !((toScreenX(x + width) > 0) && (toScreenX(x) < LCDWIDTH) && (toScreenY(y) < LCDHEIGHT) && (toScreenY(y + height) > 0));
+}
+
+bool isOffScreenW(int16_t x, int16_t y, byte width, byte height) {
+  return ((toScreenX(x + width) > 0) && (toScreenX(x) < LCDWIDTH) && (toScreenY(y) < LCDHEIGHT) && (toScreenY(y + height) > 0));
 }
 
 
@@ -54,13 +59,13 @@ class World {
   byte MapWidth = 75;
   byte MapHeight = 25;
   
-  uint16_t WaterLevel = 16;
+  int16_t WaterLevel = 16;
   uint32_t WaterWave = 0;
   bool FlagSet = false;
   int8_t FlagWave = 0;
   byte FlagEggs = 0;
   byte FlagGolden = 0;
-  byte Anger = 0;
+  int16_t Anger = 0;
 
   byte MaxEggs = 20;
   byte MaxGolden = 5;
@@ -165,6 +170,8 @@ class World {
     byte gt = 0;
     if(t==0) {
       gt = GetTile(PIMX+Div8(PICX),PIMY+Div8(PICY));
+    } else if(t == 2) {
+      return 0;
     } else {
       gt = GetTileNoObstacle(PIMX+Div8(PICX),PIMY+Div8(PICY));
     }
@@ -186,6 +193,10 @@ class World {
   }
 
   byte GetTile(int16_t x, int16_t y){
+    if(TutorialMode) {
+      return Tutorial[x+y*MapWidth];
+    }
+    
     //2,1 -- 3,0 -- 3,1 Flip TileGround and tiles
     
     if(x<0||y<0||x>=MaxMapW||y>=MaxMapH) {
@@ -219,6 +230,10 @@ class World {
   }
 
   byte GetTileNoObstacle(int16_t x, int16_t y){
+    if(TutorialMode) {
+      return Tutorial[x+y*MapWidth];
+    }
+    
     if(x<0||y<0||x>=MaxMapW||y>=MaxMapH) {
       return 1;
     }
@@ -238,10 +253,16 @@ class World {
   }
 
   uint16_t GetSpawnPositionX () {
+    if(TutorialMode) {
+      return Mul64(2)+32;
+    }
     return (MapWidth/2-2)*64+32;
   }
 
   uint16_t GetSpawnPositionY () {
+    if(TutorialMode) {
+      return 9*64;
+    }
     return (2*64);
   }
 
@@ -267,8 +288,12 @@ class World {
       yMax--;
       xMax--;
     }
+    if(PartialRendering) {
+      yMin+=3;
+      yMax-=4;
+    }
 
-    if(!isOffScreen(MapWidth*4, 8, 23, 32)) {
+    if(!isOffScreen(MapWidth*4, 8, 23, 32) && !TutorialMode) {
       if(FlagGolden > 5) {
         gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
         gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
@@ -285,8 +310,25 @@ class World {
         gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
       }
       gb.display.drawImage(MapWidth*4 - cameraX, 8 - cameraY, Basket);
+    } else if(!isOffScreen(46*4, 8, 23, 32) && TutorialMode) {
+      if(FlagGolden > 5) {
+        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+      } else if(FlagGolden > 3) {
+        gb.display.drawImage((46*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+      } else if(FlagGolden > 1) {
+        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+      } else if(FlagGolden > 0) {
+        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+      }
+      gb.display.drawImage(46*4 - cameraX, 8 - cameraY, Basket);
     }
-    if(!isOffScreen((MapWidth/2*8 - 12), 10, 15, 24)) {
+    if(!isOffScreen((MapWidth/2*8 - 12), 10, 15, 24) && !TutorialMode) {
       if(FlagSet && FlagWave >= 0) {
         Flag.setFrame(1+FlagWave/2);
         FlagWave++;
@@ -300,6 +342,20 @@ class World {
         Flag.setFrame(0);
       }
       gb.display.drawImage((MapWidth/2*8 - 12) - cameraX, 10 - cameraY, Flag);
+    } else if(!isOffScreen((46/2*8 - 12), 10, 15, 24) && TutorialMode){
+      if(FlagSet && FlagWave >= 0) {
+        Flag.setFrame(1+FlagWave/2);
+        FlagWave++;
+        if(FlagWave > 3*2) {
+          FlagWave = 0;
+        }
+      } else {
+        if(FlagWave < 0) {
+          FlagWave++;
+        }
+        Flag.setFrame(0);
+      }
+      gb.display.drawImage((46/2*8 - 12) - cameraX, 10 - cameraY, Flag);
     }
     
     for(int16_t y = yMin; y < yMax; y++) {
@@ -371,7 +427,7 @@ class World {
     }
 
     for(int16_t x = xMin; x < xMax; x++ ) {
-      int8_t c = cos(WaterWave)*2;
+      int8_t c = cos(WaterWave)*2; //No lut? WHO CARES
       if(toScreenY(MapHeight*8-(WaterLevel + c)) < LCDHEIGHT && toScreenY(MapHeight*8-(WaterLevel + c)) >= 0) {
         gb.display.drawImage(toScreenX(Mul8(x)), toScreenY(MapHeight*8-(WaterLevel + c)), Water);
         gb.display.setColor((ColorIndex)11);
@@ -379,7 +435,9 @@ class World {
       }
       WaterWave++;
       if(WaterWave % 520 == 0) {
-        WaterLevel++;
+        if(!TutorialMode) {
+          WaterLevel++;
+        }
       }
     }
   }
@@ -399,6 +457,18 @@ class World {
     Anger = 0;
     randomSeed(S);
     Seed = S;
+
+    if(TutorialMode) {
+      MapWidth = 65;
+      MapHeight = 16;
+
+      MaxEggs = 2;
+      MaxGolden = 1;
+      return;
+    } else {
+      MapWidth = 75;
+      MapHeight = 25;
+    }
     
     byte Cut = random(3,MapTileGroupW-3);
     byte ThemeA = random(0,5);
@@ -450,24 +520,26 @@ class World {
     for(int8_t x = 0; x < MapTileGroupW; x++) {
       for(int8_t y = 0; y < MapTileGroupH; y++) {
         //Current Block is Available
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x-1>=0 && y+1<MapTileGroupH) {
-          //The block to the < is ground
-          //The block bellow is ground
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-            //Set to partial
-            mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
-          }
-        } else
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x+1<MapTileGroupW && y+1<MapTileGroupH) {
-          //The block to the > is ground
-          //The block bellow is ground
-          if(ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) == 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-            //Set to stair
-            mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
-            if(x-1>=0) {
-              if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1) {
-                //Set as Stair or Partial
-                mapTileGroups[x][y] = 4;
+        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0) {
+          if(y+1<MapTileGroupH) {
+            if(ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
+              //Bellow is ground
+              if(x-1>=0) {
+                if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1) {
+                  mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
+                  if(x+1<MapTileGroupW) {
+                    if(ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) == 1) {
+                      mapTileGroups[x][y] = ThemeTileTypeMerge(0,4);
+                    }
+                  }
+                }
+              }
+              if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0) {
+                if(x+1<MapTileGroupW) {
+                  if(ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) == 1) {
+                    mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
+                  }
+                }
               }
             }
           }

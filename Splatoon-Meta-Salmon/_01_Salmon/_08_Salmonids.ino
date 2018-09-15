@@ -5,6 +5,7 @@ class Salmonid:
   public:
   byte type = 0;
   int16_t Live = 0;
+  byte BLive = 0;
   int16_t LiveS1 = 0;
   int16_t LiveS2 = 0;
   byte cooldown = 0;
@@ -24,12 +25,20 @@ class Salmonid:
   //7: Robot guy
   //8: The one with a bomb on his head
   //9: Tower
+  //10: EggDrop
+  //11: GoldenEggDrop
   
   virtual int16_t getYBounce() {
+    if(type == 10 || type == 11) {
+      return 65;
+    }
     return 40;
   };
 
   virtual int16_t getGravity() {
+    if(type == 10 || type == 11) {
+      return 0;
+    }
     if(type == 6) {
       return 0;
     }
@@ -55,6 +64,14 @@ class Salmonid:
       return 23;
     } else if(type == 6) {
       return 12;
+    } else if(type == 7) {
+      return 0;
+    } else if(type == 8) {
+      return 23;
+    } else if(type == 9) {
+      return 24;
+    } else if(type == 10 || type == 11) {
+      return 10;
     }
   };
   
@@ -81,6 +98,30 @@ class Salmonid:
       return 19;
     } else if(type == 6) {
       return 11;
+    } else if(type == 7) {
+      return 0;
+    } else if(type == 8) {
+      return 23;
+    } else if(type == 9) {
+      byte r = 69;
+      if((BLive&B00010000) == 0) {
+        r-=9;
+      }
+      if((BLive&B00001000) == 0) {
+        r-=12;
+      }
+      if((BLive&B00000100) == 0) {
+        r-=9;
+      }
+      if((BLive&B00000010) == 0) {
+        r-=14;
+      }
+      if((BLive&B00000001) == 0) {
+        r-=12;
+      }
+      return r;
+    } else if(type == 10 || type == 11) {
+      return 10;
     }
   };
 
@@ -99,6 +140,20 @@ class Salmonid:
       return 180;
     } else if(type == 6) {
       return 1;
+    } else if(type == 7) {
+      return 0;
+    } else if(type == 8) {
+      return 210;
+    } else if(type == 10 || type == 11) {
+      return 60;
+    }
+  }
+
+  byte getBLive () {
+    if(type == 9) {
+      return B00011111;
+    } else {
+      return 0;
     }
   }
 
@@ -106,6 +161,8 @@ class Salmonid:
     if(type == 5) {
       return 280;
     } else if(type == 6) {
+      return 90;
+    } else if(type == 9) {
       return 90;
     } else {
       return 0;
@@ -126,6 +183,14 @@ class Salmonid:
     } else if(type == 5) {
       return 42;
     } else if(type == 6) {
+      return 0;
+    } else if(type == 7) {
+      return 55;
+    } else if(type == 8) {
+      return 0;
+    } else if(type == 9) {
+      return 35;
+    } else if(type == 10 || type == 11) {
       return 0;
     }
   }
@@ -149,6 +214,12 @@ class Salmonid:
       return 2;
     } else if(type == 8) {
       return 2;
+    } else if(type == 9) {
+      return 2;
+    } else if(type == 10) {
+      return 3;
+    } else {
+      return 0;
     }
   }
 
@@ -171,10 +242,20 @@ class Salmonid:
       return 2;
     } else if(type == 8) {
       return 2;
+    } else if(type == 9) {
+      return 2;
+    } else if(type == 11) {
+      return 2;
+    } else {
+      return 0;
     }
   }
 
   byte getSpeed () {
+    if(TutorialMode && type == 1) {
+      return 0;
+    }
+    
     if(type == 0) {
       return 80;
     } else if(type == 1) {
@@ -185,37 +266,50 @@ class Salmonid:
       return 55;
     } else if(type == 5) {
       return 42;
+    } else if(type == 8) {
+      return 14;
+    } else if(type == 9) {
+      return 7;
     }
   }
 
   int8_t getAnger () {
     if(type == 0) {
-      return 2;
+      return 3;
     } else if(type == 1) {
-      return 4;
-    } else if(type == 2) {
-      return 4;
-    } else if(type == 3) {
       return 8;
+    } else if(type == 2) {
+      return 8;
+    } else if(type == 3) {
+      return 12;
     } else if(type == 4) {
       return -18;
-    } else if(type == 4) {
+    } else if(type == 5) {
       return -22;
-    } 
+    } else if(type == 8) {
+      return -32;
+    } else if(type == 9) {
+      return -26;
+    }
+    return 0;
   }
 
   void UnSpawnedUpdate () {
+    if(type == 10 || type == 11) {
+      hasSpawned = true;
+      return;
+    }
     if(!hasSpawned) {
       Object::UpdateGrounding(0);
     }
-    if(Div8(y)<(world.MapHeight*8-10*8) && !(IsGroundedUp||IsGroundedDown||IsGroundedLeft||IsGroundedUp)) {
+    if(Div8(y)<(world.MapHeight*8-6*8) && !(IsGroundedUp||IsGroundedDown||IsGroundedLeft||IsGroundedUp)) {
       hasSpawned = true;
     }
     if(type == 4) {
       y -= 3*8;
       return;
     }
-    if((Div8(y)>(world.MapHeight*8-10*8) || (IsGroundedUp||IsGroundedDown||IsGroundedLeft||IsGroundedUp)) && !hasSpawned) {
+    if((Div8(y)>(world.MapHeight*8-6*8) || (IsGroundedUp||IsGroundedDown||IsGroundedLeft||IsGroundedUp)) && !hasSpawned) {
       y -= 3*8;
       Draw();
       return;
@@ -240,7 +334,7 @@ class Salmonid:
       }
     }
 
-    if(turningCooldown%3 == 0 && type != 4) {
+    if(turningCooldown%3 == 0 && type != 4 && type != 10 && type != 11) {
       if(IsGroundedDown) {
         world.SMSetPaintAtWallIndex(constrain(Div64(x),0,world.MapWidth-1), constrain(Div64(y)+1,0,world.MapWidth-1), 0, 1);
       }
@@ -268,9 +362,52 @@ class Salmonid:
             bulletsManager.bullets[i].Die();
           }
         }
+        if(type == 8) {
+          //BODY
+          if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x)-16,Div8(y)-40,36,51)) {
+            playSFX(2,1);
+            particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
+            bulletsManager.bullets[i].Die();
+          }
+
+          //BALOON
+          
+        } else if(type == 9 && BLive > 0) {
+          if(LiveS1 > 0) {
+            if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x),Div8(y)-getSHeight(),getWidth(),getSHeight()) && bulletsManager.bullets[i].color != 1) {
+              playSFX(2,0);
+              LiveS1-=bulletsManager.bullets[i].Damage;
+              particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
+              bulletsManager.bullets[i].Die();
+            }
+          }
+          if(LiveS1<=0) {
+            if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x),Div8(y)-getSHeight(),getWidth(),getSHeight())) {
+              playSFX(2,1);
+              if((BLive&B00000001) == 1<<0) {
+                BLive &= ~(1 << 0);
+              } else
+              if((BLive&B00000010) == 1<<1) {
+                BLive &= ~(1 << 1);
+              } else
+              if((BLive&B00000100) == 1<<2) {
+                BLive &= ~(1 << 2);
+              } else
+              if((BLive&B00001000) == 1<<3) {
+                BLive &= ~(1 << 3);
+              } else
+              if((BLive&B00010000) == 1<<4) {
+                BLive &= ~(1 << 4);
+              }
+              particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
+              bulletsManager.bullets[i].Die();
+            }
+            LiveS1 = getLiveSecond();
+          }
+        } else
         if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x),Div8(y)-getSHeight(),getWidth(),getSHeight())) {
           if(bulletsManager.bullets[i].color != 1) {
-            if(type == 4 && cooldown < 19) {
+            if(type == 4 && cooldown < 21) {
               cooldown += 3;
 
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
@@ -322,6 +459,16 @@ class Salmonid:
             } else if(type == 6) {
               playSFX(2,1);
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
+            } else if(type == 10 || type == 11) {
+              particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
+              Live-=bulletsManager.bullets[i].Damage;
+              bulletsManager.bullets[i].Die();
+  
+              if(!isOffScreen() && Live > 0) {
+                playSFX(2,0);
+              } else if(!isOffScreen()) {
+                playSFX(3,0);
+              }
             } else {
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
               Live-=bulletsManager.bullets[i].Damage;
@@ -345,17 +492,32 @@ class Salmonid:
     }
 
     //Attack and collision of basic type salmonid 0-3
-    if(type == 0 || type == 1 || type == 2 || type == 3) {
+    if(type == 0 || type == 1 || type == 2 || type == 3 || type == 9) {
       if(cooldown > 0) {
         cooldown--;
       }
       bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+1;
       bool AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+4;
       bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
-      if(cooldown == 0 && IsGroundedDown && AttackRange && player.mainPlayer.RespawnTimer <= 0) {
+      if(cooldown == 0 && IsGroundedDown && AttackRange && player.mainPlayer.RespawnTimer <= 0 && type != 9) {
         vy += 60;
         cooldown = 12;
         player.mainPlayer.Live -= getAttackDamage()*(1+world.Anger/100.0F*0.3F);
+      }
+      if(cooldown == 0 && type == 9) {
+        cooldown = 154;
+        int8_t bulletID = bulletsManager.spawnBullet(
+          x - 8*1, y-getSHeight()*8, //Position x, y
+          0,0,      //Velocity vx, vy
+          1,1,      //Color, Owner
+          5         //Type
+        );
+        if(bulletID!=-1) {
+          bulletsManager.bullets[bulletID].Timer = 0;
+          bulletsManager.bullets[bulletID].gravity = 10;
+          bulletsManager.bullets[bulletID].Damage = 48;
+          bulletsManager.bullets[bulletID].BulletTimeLimit = 120;
+        }
       }
       //knockback not working
       if(PushRange) {
@@ -437,7 +599,7 @@ class Salmonid:
         cooldown = 66;
       }
       Object::CleanUpdate(true);
-      if(cooldown >= 26) {
+      if(cooldown >= 46) {
         if((IsGroundedLeft && -dir) || (IsGroundedRight && dir)) {
           y -= 8;
           vy = 0;
@@ -551,6 +713,35 @@ class Salmonid:
       }
       Object::CleanUpdate(true);
       Draw();
+    } else if(type == 8) {
+      if(cooldown > 0) {
+        cooldown--;
+      }
+      bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)-getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+1;
+      bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
+      //knockback not working ?
+      if(PushRange) {
+        vx = constrain(-dir*-getSpeed()*0.5F,-140,140);
+      } else if((vx < 0 && dir == 1) || (vx > 0 && dir == -1) || (vx/VFORCE == 0)) {
+        vx = dir*-getSpeed()*(1+world.Anger/8/100);
+      }
+      if(InWater) {
+        vy += 15;
+      }
+      
+      Object::CleanUpdate(true);
+      Draw();
+      
+      if((IsGroundedLeft || IsGroundedRight) && IsGroundedDown) {
+        vy = 80;
+      }
+      if((IsGroundedLeft || IsGroundedRight) && !IsGroundedDown && vy < 0) {
+        vy += 120;
+      }
+    } else if(type == 10 || type == 11) {
+      vy = -20;
+      Object::Update();
+      Draw();
     }
 
 
@@ -564,7 +755,7 @@ class Salmonid:
   #define HealtbarDistance 3
 
   void Draw () {
-    if(!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT))
+    if((!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT) && type != 8))
       return;
 
     float Squash = 1.0F + constrain(vy/8, -3, 3)/30.0F;
@@ -576,8 +767,11 @@ class Salmonid:
     } else if(type == 3) {
       gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-31*Squash), FatSalmonid, 32 * -dir, 31*Squash);
     } else if(type == 4) {
-      if(cooldown >= 18) {
+      if(cooldown >= 46) {
         gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-4), MawsLight);
+      } else
+      if(cooldown >= 18) {
+        gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-17), Maws_Alert);
       } else if(cooldown >= 10) {
         Maws.setFrame(0);
         gb.display.drawImage(toScreenX(Div8(x)-14), toScreenY(Div8(y)-(17-cooldown)*3+(17-cooldown)/2), Maws);
@@ -620,6 +814,85 @@ class Salmonid:
           gb.display.drawImage(toScreenX(Div8(x)-9), toScreenY(Div8(y)-16), FlyingSalmonCover, 9, 13);
         }
       }
+    } else if(type == 7) {
+      
+    } else if(type == 8) {
+      if(-dir == 1) {
+        if(!isOffScreenW(toScreenX(Div8(x)+0-16-3), toScreenY(Div8(y)-51-3), 19, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)+0-16-3), toScreenY(Div8(y)-51-3), SteelHead_0, 19, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)+16-16), toScreenY(Div8(y)-51), 20, 14)) {
+          gb.display.drawImage(toScreenX(Div8(x)+16-16), toScreenY(Div8(y)-51), SteelHead_01, 20, 14);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)+0-16), toScreenY(Div8(y)-37), 16, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)+0-16), toScreenY(Div8(y)-37), SteelHead_10, 16, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)+16-16), toScreenY(Div8(y)-37), 21, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)+16-16), toScreenY(Div8(y)-37), SteelHead_11, 21, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)+4-16), toScreenY(Div8(y)-20), 12, 20)) {
+          gb.display.drawImage(toScreenX(Div8(x)+4-16), toScreenY(Div8(y)-20), SteelHead_02, 12, 20);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)+0), toScreenY(Div8(y)-20), 23, 20)) {
+          gb.display.drawImage(toScreenX(Div8(x)+0), toScreenY(Div8(y)-20), SteelHead_12, 23, 20);
+        }
+      } else {
+        if(!isOffScreenW(toScreenX(Div8(x)), toScreenY(Div8(y)-51-3), 19, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-51-3), SteelHead_0, -19, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)-20), toScreenY(Div8(y)-51), 20, 14)) {
+          gb.display.drawImage(toScreenX(Div8(x)-20), toScreenY(Div8(y)-51), SteelHead_01, -20, 14);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)), toScreenY(Div8(y)-37), 16, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-37), SteelHead_10, -16, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)-21), toScreenY(Div8(y)-37), 21, 17)) {
+          gb.display.drawImage(toScreenX(Div8(x)-21), toScreenY(Div8(y)-37), SteelHead_11, -21, 17);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)), toScreenY(Div8(y)-20), 12, 20)) {
+          gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-20), SteelHead_02, -12, 20);
+        }
+        if(!isOffScreenW(toScreenX(Div8(x)-23), toScreenY(Div8(y)-20), 23, 20)) {
+          gb.display.drawImage(toScreenX(Div8(x)-23), toScreenY(Div8(y)-20), SteelHead_12, -23, 20);
+        }
+      }
+    } else if(type == 9) {
+      byte h = 0;
+      h+=6;
+      gb.display.drawImage(toScreenX(Div8(x)+4), toScreenY(Div8(y)-h), TowerSalmon_Base);
+      if((BLive&B00000001) == 1<<0) {
+        h+=12;
+        h+=(5*Squash)-5;
+        gb.display.drawImage(toScreenX(Div8(x)+0), toScreenY(Div8(y)-h), TowerSalmon_4);
+      }
+      if((BLive&B00000010) == 1<<1) {
+        h+=14;
+        h+=(5*Squash)-5;
+        gb.display.drawImage(toScreenX(Div8(x)+1), toScreenY(Div8(y)-h), TowerSalmon_3);
+      }
+      if((BLive&B00000100) == 1<<2) {
+        h+=9;
+        h+=(5*Squash)-5;
+        gb.display.drawImage(toScreenX(Div8(x)+1), toScreenY(Div8(y)-h), TowerSalmon_2);
+      }
+      if((BLive&B00001000) == 1<<3) {
+        h+=12;
+        h+=(5*Squash)-5;
+        gb.display.drawImage(toScreenX(Div8(x)+3), toScreenY(Div8(y)-h), TowerSalmon_1);
+      }
+      if((BLive&B00010000) == 1<<4) {
+        h+=9;
+        h+=(5*Squash)-5;
+        gb.display.drawImage(toScreenX(Div8(x)+2), toScreenY(Div8(y)-h), TowerSalmon_0);
+      }
+      h+=17;
+      gb.display.drawImage(toScreenX(Div8(x)+2), toScreenY(Div8(y)-h), TowerSalmon_Head, -19 * dir, 17);
+    } else if(type == 10) {
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-9), EggDropCrate);
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-21), EggDropBalloon);
+    } else if(type == 11) {
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-9), GoldenEggDropCrate);
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-21), EggDropBalloon);
     }
   }
 
@@ -636,9 +909,11 @@ class Salmonid:
     } else if(type == 3) {
       DrawHealtBarAt(toScreenX(Div8(x)), toScreenY(Div8(y)-31*Squash-HealtbarDistance), 32);
     } else if(type == 4 && cooldown < 19) {
-      DrawHealtBarAt(toScreenX(Div8(x)), toScreenY(Div8(y)-23-HealtbarDistance), 23);
+      DrawHealtBarAt(toScreenX(Div8(x)), toScreenY(Div8(y)-28-HealtbarDistance), 4);
     } else if(type == 5) {
       DrawHealtBarAt(toScreenX(Div8(x)), toScreenY(Div8(y)-19*Squash-HealtbarDistance), 19);
+    } else if(type == 8) {
+      DrawHealtBarAt(toScreenX(Div8(x)-16), toScreenY(Div8(y)-51*Squash-HealtbarDistance), 51);
     }
   }
 
@@ -650,6 +925,15 @@ class Salmonid:
   }
 
   void Kill (bool DropEgg) {
+    if(TutorialMode && type == 1) {
+      AnimationTimer6 = 5;
+      AnimationTimer7 = 0;
+    }
+    if(TutorialMode && type == 4) {
+      AnimationTimer6 = 5;
+      AnimationTimer7 = 6;
+    }
+    
     activeSalmons--;
     alive = false;
     int8_t eggDir = 1;
@@ -672,7 +956,7 @@ class Salmonid:
   }
 };
 
-#define SalmonidCount 5
+#define SalmonidCount 4
 class SalmonidManager {
   public:
   Salmonid salmonids[SalmonidCount];
@@ -690,7 +974,7 @@ class SalmonidManager {
       //zonePosition
       zonePositionA = 2;
       if(Div8(world.MapHeight*8-world.WaterLevel) > world.MapHeight-5) {
-        for(int8_t x = world.MapWidth/2-1; x >= 0; x--) {
+        for(int8_t x = 0; x < world.MapWidth/2; x++) {
           if(world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) == 0) {
             zonePositionA = x;
             break;
@@ -699,12 +983,12 @@ class SalmonidManager {
       }
       
       cooldown = 170 + random(0, 220);
-      SpawnBatchAt(zonePositionA);
+      SpawnBatchAt(zonePositionA+8);
     } else if((cooldown == 0 || activeSalmons == 0) && abs(Div64(player.mainPlayer.x) - zonePositionB) < 12) {
       //zonePosition
       zonePositionB = world.MapWidth-2;
       if(Div8(world.MapHeight*8-world.WaterLevel) > world.MapHeight-5) {
-        for(int8_t x = world.MapWidth/2; x < world.MapWidth; x++) {
+        for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
           if(world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) == 0) {
             zonePositionB = x;
             break;
@@ -713,14 +997,14 @@ class SalmonidManager {
       }
       
       cooldown = 170 + random(0, 220);
-      SpawnBatchAt(zonePositionB);
+      SpawnBatchAt(zonePositionB-8);
     } else {
       if(cooldown == 0) {
         cooldown = 170 + random(0, 220);
 
         zonePositionA = 2;
         if(Div8(world.MapHeight*8-world.WaterLevel) > world.MapHeight-5) {
-          for(int8_t x = world.MapWidth/2-1; x >= 0; x--) {
+          for(int8_t x = 0; x < world.MapWidth/2; x++) {
             if(world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) == 0) {
               zonePositionA = x;
               break;
@@ -730,7 +1014,7 @@ class SalmonidManager {
 
         zonePositionB = world.MapWidth-2;
         if(Div8(world.MapHeight*8-world.WaterLevel) > world.MapHeight-5) {
-          for(int8_t x = world.MapWidth/2; x < world.MapWidth; x++) {
+          for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
             if(world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) == 0) {
               zonePositionB = x;
               break;
@@ -743,26 +1027,68 @@ class SalmonidManager {
   }
 
   void SpawnBatchAt(byte zonePosition) {
-    byte r = 0;//random(0,3);
-      if(r==0) {
-        bool AlreadyFatGuys = false;
-        for(byte i = 0; i < SalmonidCount; i++) {
-          if(salmonids[i].alive && salmonids[i].type == /*3*/6) {
-            AlreadyFatGuys = true;
-            break;
+    if(TutorialMode) {
+      return;
+    }
+    bool Boss = false;
+    for(byte i = 0; i < SalmonidCount; i++) {
+      if(salmonids[i].alive && (salmonids[i].type == 3 ||  salmonids[i].type == 4 || salmonids[i].type == 5 || salmonids[i].type == 6 || salmonids[i].type == 8 || salmonids[i].type == 9)) {
+        Boss = true;
+        break;
+      }
+    }
+
+    //Need help? Here's a drop. Power drop needs high sea level (2/3 <) and < 3/4 eggs max
+    //Golden drop needs high sea level (1/2 <) and < 3/4 eggs max
+    //Power priority, low chance of happening
+    if(random(0,7) == 0) {
+      if(world.MaxEggs*3/4 > world.FlagEggs && (25*8)*2/3 < world.WaterLevel) {
+        //Spawn a drop near player
+        Spawn(Div8(player.mainPlayer.x)+random(-8,9), 4, 10);
+        return;
+      } else if(world.MaxGolden*3/4 > world.FlagGolden && (25*8)*1/2 < world.WaterLevel) {
+        //Spawn a drop near player
+        Spawn(Div8(player.mainPlayer.x)+random(-8,9), 4, 11);
+        return;
+      }
+    }
+
+    if(!Boss) {
+      byte salmon = 0;
+      if(world.MaxEggs/2 > world.FlagEggs) {
+        Spawn(zonePosition*8-8, world.MapHeight*8-16, 3);
+      } else {
+        if(difficulty == 5 || difficulty == 6) {
+          salmon = random(3,8);
+          if(salmon == 7) {
+            salmon = 9;
           }
+          Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon);
+        } else
+        if(difficulty == 3 || difficulty == 4) {
+          salmon = random(3,7);
+          Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon);
+        } else
+        if(difficulty == 1 || difficulty == 2) {
+          salmon = random(3,6);
+          Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon);
+        } else 
+        if(difficulty == 0) {
+          salmon = random(3,6);
+          if(salmon == 4) {
+            salmon = 5;
+          }
+          Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon);
         }
-        if(!AlreadyFatGuys) {
-          Spawn(zonePosition*8-8, world.MapHeight*8-16, /*3*/6);
-        } else {
-          //Spawn(zonePosition*8-8, world.MapHeight*8-16, 1);
-        }
-      } if(r==1) {
+      }
+    } else {
+      if(random(0,2)==0) {
         Spawn(zonePosition*8-8, world.MapHeight*8-16, 0);
         Spawn(zonePosition*8-8, world.MapHeight*8-16, 1);
       } else {
         Spawn(zonePosition*8-8, world.MapHeight*8-16, random(0,2));
       }
+    }
   }
 
   void UnSpawnedGlobalUpdate () {
@@ -785,6 +1111,7 @@ class SalmonidManager {
         salmonids[i].type = type;
         salmonids[i].alive = true;
         salmonids[i].Live = salmonids[i].getLive();
+        salmonids[i].BLive = salmonids[i].getBLive();
         salmonids[i].LiveS1 = salmonids[i].getLiveSecond();
         salmonids[i].LiveS2 = salmonids[i].getLiveSecond();
         salmonids[i].cooldown = 0;

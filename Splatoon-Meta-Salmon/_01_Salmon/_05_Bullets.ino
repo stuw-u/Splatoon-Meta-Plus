@@ -65,6 +65,11 @@ class Bullets:
         } else if(Type == 4) { //Ennemy Missile (Green only)
           gb.display.colorIndex = palette;
           gb.display.drawImage(toScreenX(Div8(x)-2), toScreenY(Div8(y)-12), Missile);
+        } else if(Type == 5) { //Ennemy Track Missile (Green only)
+          gb.display.colorIndex = palette;
+          gb.display.colorIndex = palette;
+          TrackMissile.setFrame((Timer/3)%2);
+          gb.display.drawImage(toScreenX(Div8(x)-2), toScreenY(Div8(y)-2), TrackMissile);
         }
         gb.display.colorIndex = palette;
       }
@@ -163,7 +168,11 @@ class Bullets:
       }
 
       if(!IsDead) {
-        Object::Update();
+        if(Type == 5) {
+          Object::HyperCleanUpdate(true);
+        } else {
+          Object::Update();
+        }
 
         Draw();
       }
