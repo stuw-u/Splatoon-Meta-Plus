@@ -16,6 +16,13 @@ class Egg:
     return 1;
   };
 
+  virtual int16_t getXFriction() {
+    return 62;
+  };
+  virtual int16_t getYFriction() {
+    return 62 * (type==0);
+  };
+
   virtual int16_t getGravity() {
     if(type == 0) {
       return 55;
@@ -40,6 +47,7 @@ class Egg:
   
   void Update () {
     if(type == 0 && !collected) {
+      collected = true;
       vx = 40*dir;
     }
     if(!collected) {
@@ -55,6 +63,9 @@ class Egg:
       dir = 1;
     }
 
+    vx = constrain(vx, -80, 80);
+    vy = constrain(vy, -80, 80);
+    
     if(world.PixelInCollider(Div64(x),Div64(y),Div8(x)%8,Div8(y)%8,0) == 1) {
       y -= Mul8(2);
     }
@@ -127,10 +138,12 @@ class EggManager {
   void Spawn (int16_t x, int16_t y, byte type, int8_t dir) {
     bool uncollected = false;
     for(byte i = 0; i < MaxEgg; i++) {
-      if(!eggs[i].alive) {
+      if(!eggs[i].alive || (type == 1 && eggs[i].type == 0)) {
         eggs[i].alive = true;
         eggs[i].x = Mul8(x);
         eggs[i].y = Mul8(y);
+        eggs[i].vx = 0;
+        eggs[i].vy = 0;
         eggs[i].type = type;
         eggs[i].collected = false;
         eggs[i].timer = 1600;

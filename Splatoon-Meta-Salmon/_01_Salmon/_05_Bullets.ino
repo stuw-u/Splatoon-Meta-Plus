@@ -208,7 +208,9 @@ class BulletsManager {
 
   void Update () {
     for(byte i = 0; i < BCOUNT; i++) {
-      bullets[i].Update();
+      if(!bullets[i].IsDead) {
+        bullets[i].Update();
+      }
     }
   }
 };

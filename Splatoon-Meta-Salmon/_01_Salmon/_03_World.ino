@@ -245,7 +245,7 @@ class World {
       if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 0) {
         return Themes[0][1];
       } else if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 1) {
-        return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
+        return Themes[0][1+0 * TilesGroupCount + ((x%5) + (y%5) * 5)];
       } else {
         return 0;
       }
@@ -294,22 +294,31 @@ class World {
     }
 
     if(!isOffScreen(MapWidth*4, 8, 23, 32) && !TutorialMode) {
-      if(FlagGolden > 5) {
-        gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 3) {
-        gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 1) {
-        gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 0) {
-        gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+      if(FlagEggs >= MaxEggs && FlagGolden >= MaxGolden) {
+        Canon.setFrame(FlagWave);
+        if(WaterLevel%2==0) {
+          gb.display.drawImage(MapWidth*4 - cameraX, (8+18) - cameraY, Canon, 30, 14);
+        } else {
+          gb.display.drawImage(MapWidth*4-18 - cameraX, (8+18) - cameraY, Canon, -30, 14);
+        }
+      } else {
+        if(FlagGolden > 5) {
+          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        } else if(FlagGolden > 3) {
+          gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        } else if(FlagGolden > 1) {
+          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
+          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        } else if(FlagGolden > 0) {
+          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
+        }
+        gb.display.drawImage(MapWidth*4 - cameraX, 8 - cameraY, Basket);
       }
-      gb.display.drawImage(MapWidth*4 - cameraX, 8 - cameraY, Basket);
     } else if(!isOffScreen(46*4, 8, 23, 32) && TutorialMode) {
       if(FlagGolden > 5) {
         gb.display.drawImage((46*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
@@ -450,8 +459,10 @@ class World {
   void Initialize (byte S) {
     FlagSet = false;
     FlagWave = 0;
-    MaxEggs = random(18,38);
-    MaxGolden = random(4,8);
+    MaxEggs = random(18,26);
+    MaxGolden = random(2,5);
+    FlagEggs = 0;
+    FlagGolden = 0;
     WaterWave = 0;
     WaterLevel = 16;
     Anger = 0;
@@ -462,7 +473,7 @@ class World {
       MapWidth = 65;
       MapHeight = 16;
 
-      MaxEggs = 2;
+      MaxEggs = 3;
       MaxGolden = 1;
       return;
     } else {

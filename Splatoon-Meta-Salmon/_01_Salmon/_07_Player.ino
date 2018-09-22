@@ -888,7 +888,6 @@ class Player :
 class PlayersOperator {
   public:
   Player mainPlayer;
-  Player players[PLAYER_C-1];
 
   void Initialize () {
     revertColors = 0;
@@ -903,140 +902,33 @@ class PlayersOperator {
   }
 
   void UpdateGlobal () {
-    for(int16_t i = 0; i < PLAYER_C; i++) {
-      if(i == 0) {
-        if(Div64(mainPlayer.x) == 36 && !world.FlagSet && !TutorialMode) {
-          playSFX(7,0);
-          world.FlagSet = true;
-          world.FlagWave = -5;
-          particleManager.spawnParticle(world.MapWidth*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
-        }
-        if(Div64(mainPlayer.x) == 22 && !world.FlagSet && TutorialMode) {
-          playSFX(7,0);
-          world.FlagSet = true;
-          world.FlagWave = -5;
-          particleManager.spawnParticle(45*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
-        }
-        if(Div64(mainPlayer.x) == 37 && mainPlayer.HasGoldenEgg && !TutorialMode) {
-          playSFX(2,1);
-          mainPlayer.HasGoldenEgg = false;
-          world.FlagGolden++;
-        }
-        if(Div64(mainPlayer.x) == 23 && mainPlayer.HasGoldenEgg && TutorialMode) {
-          playSFX(2,1);
-          mainPlayer.HasGoldenEgg = false;
-          world.FlagGolden++;
-        }
-        if(Div8(mainPlayer.y)+8 >= world.MapHeight*8-(world.WaterLevel) && mainPlayer.RespawnTimer <= 0) {
-          mainPlayer.Live -= 5;
-          mainPlayer.vy += 15;
-        }
-        mainPlayer.Update();
-      } else {
-        players[i-1].Update();
-
-        if(AnimationTimer2%10 == 0) {
-          //Analize surrouding player:
-          //- Close player needs help and no one's nearby
-          //- How many ennemies are nearby and am I attacked
-          //- Which ennemie is the closest
-
-          //Goal:
-          //AttackPlayer/3: When a ennemie is close
-          //GotoPlayer/4: No current attack and a close teammates needs some help
-          //EscapePlayer/5: When two player are attacking
-
-          byte ennemieCountNearby = 0;
-          int8_t closestEnnemie = -1;
-          uint16_t closestRange = 65535;
-          for(int16_t e = 0; e < PLAYER_C; e++) {
-            if(e==0) {
-              if(players[i-1].PlayerColor != mainPlayer.PlayerColor && mainPlayer.RespawnTimer > 0) {
-                uint16_t Range = abs(players[i-1].x/8-mainPlayer.x/8)+abs(players[i-1].y/8-mainPlayer.y/8);
-                if(Range < 128) {
-                  ennemieCountNearby++;
-                  if(Range < closestRange) {
-                    closestEnnemie = e;
-                  }
-                }
-              }
-            } else {
-              if(players[i-1].PlayerColor != players[e-1].PlayerColor && players[e-1].RespawnTimer > 0) {
-                uint16_t Range = abs(players[i-1].x/8-players[e-1].x/8)+abs(players[i-1].y/8-players[e-1].y/8);
-                if(Range < 128) {
-                  ennemieCountNearby++;
-                  if(Range < closestRange) {
-                    closestEnnemie = e;
-                  }
-                }
-              }
-            }
-          }
-
-          if(ennemieCountNearby > 0 && closestEnnemie != -1) {
-            if(ennemieCountNearby > 1) {
-              //AttackClosestEnnemie
-              players[i-1].State = 3;
-              players[i-1].ReachingTimer = random(75,100);
-              players[i-1].TargetPlayerId = closestEnnemie;
-            } else {
-              //EscapeClosestEnnemie
-              players[i-1].State = 5;
-              players[i-1].ReachingTimer = random(100,150);
-              players[i-1].TargetPlayerId = closestEnnemie;
-            }
-          } else if(ennemieCountNearby <= 0) {
-            for(int16_t e = 0; e < PLAYER_C; e++) {
-              if(e==0) {
-                if(players[i-1].PlayerColor == mainPlayer.PlayerColor && mainPlayer.RespawnTimer > 0) {
-                  if(mainPlayer.Live < 50) {
-                    //GotoPlayer
-                    players[i-1].State = 4;
-                    players[i-1].ReachingTimer = random(100,150);
-                    players[i-1].TargetPlayerId = e;
-                  }
-                }
-              } else {
-                if(players[i-1].PlayerColor == players[e-1].PlayerColor && players[e-1].RespawnTimer > 0) {
-                  if(players[e-1].Live < 50) {
-                    //GotoPlayer
-                    players[i-1].State = 4;
-                    players[i-1].ReachingTimer = random(100,150);
-                    players[i-1].TargetPlayerId = e;
-                  }
-                }
-              }
-            }
-          }
-          
-        }
-        if((players[i-1].State == 3 || players[i-1].State == 4 || players[i-1].State == 5) && players[i-1].TargetPlayerId != -1) {
-          if(players[i-1].TargetPlayerId==0) {
-            if(mainPlayer.RespawnTimer <= 0) {
-              
-              players[i-1].State = 2;
-              players[i-1].ReachingTimer = random(81,123);
-              
-              players[i-1].TargetPlayerId = -1;
-            } else {
-              players[i-1].targetX = Div8(mainPlayer.x)-Div8(players[i-1].x);
-              players[i-1].targetY = Div8(mainPlayer.y)-Div8(players[i-1].y);
-            }
-          } else {
-            if(players[players[i-1].TargetPlayerId-1].RespawnTimer <= 0) {
-              
-              players[i-1].State = 2;
-              players[i-1].ReachingTimer = random(81,123);
-
-              players[i-1].TargetPlayerId = -1;
-            } else {
-              players[i-1].targetX = Div8(players[players[i-1].TargetPlayerId-1].x)-Div8(players[i-1].x);
-              players[i-1].targetY = Div8(players[players[i-1].TargetPlayerId-1].y)-Div8(players[i-1].y);
-            }
-          }
-        }
-      }
+    if(Div64(mainPlayer.x) == 36 && !world.FlagSet && !TutorialMode) {
+      playSFX(7,0);
+      world.FlagSet = true;
+      world.FlagWave = -5;
+      particleManager.spawnParticle(world.MapWidth*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
     }
+    if(Div64(mainPlayer.x) == 22 && !world.FlagSet && TutorialMode) {
+      playSFX(7,0);
+      world.FlagSet = true;
+      world.FlagWave = -5;
+      particleManager.spawnParticle(45*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
+    }
+    if(Div64(mainPlayer.x) == 37 && mainPlayer.HasGoldenEgg && !TutorialMode) {
+      playSFX(2,1);
+      mainPlayer.HasGoldenEgg = false;
+      world.FlagGolden++;
+    }
+    if(Div64(mainPlayer.x) == 23 && mainPlayer.HasGoldenEgg && TutorialMode) {
+      playSFX(2,1);
+      mainPlayer.HasGoldenEgg = false;
+      world.FlagGolden++;
+    }
+    if(Div8(mainPlayer.y)+8 >= world.MapHeight*8-(world.WaterLevel) && mainPlayer.RespawnTimer <= 0) {
+      mainPlayer.Live -= 5;
+      mainPlayer.vy += 15;
+    }
+    mainPlayer.Update();
   }
 
   void UpdateMain () {
@@ -1045,11 +937,3 @@ class PlayersOperator {
 };
 
 PlayersOperator player;
-
-void AddPointToPlayer(byte playerCode, byte points) {
-  if(playerCode == 0) {
-    player.mainPlayer.InkPoints+=points;
-  } else {
-    player.players[playerCode-1].InkPoints+=points;
-  }
-}

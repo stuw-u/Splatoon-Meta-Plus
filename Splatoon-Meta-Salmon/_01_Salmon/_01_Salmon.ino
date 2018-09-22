@@ -15,6 +15,16 @@
 //3: WeaponId
 //4: WeaponIdSalmon
 //5: Missions Unlocked (Byte, Each bit represed 1 mission)
+//6: Missions Unlocked (A_B) (Byte, Each bit represed 1 mission)
+//7: Eggs Count
+
+//8: Seed0
+//9: Seed1
+//10: Seed2
+//11: Seed3
+//12: Seed4
+//13: Seed5
+//14: Seed6
 
 extern const uint8_t SquidSquare[];
 
@@ -27,8 +37,8 @@ extern const uint8_t SquidSquare[];
 //#define SCALE 8
 #define VFORCE 5
 
-#define BCOUNT 12
-#define PCOUNT 6
+#define BCOUNT 7
+#define PCOUNT 5
 
 #define STARTLENGHT 90
 #define STARTLENGHT2 130
@@ -72,6 +82,7 @@ int16_t cameraX, cameraY, shakeTimeLeft, shakeAmplitude;
 uint8_t cpuLoad = 0;
 uint8_t lastLoad[8];
 uint8_t difficulty = 0;
+uint8_t difficultyB = 0;
 
 //UI and Screen parameters
 bool IsPlaying = false;//true; //Starts game (GameState define mode, 0:Classic, 1:Rainmaker, 2:Zones, 3:Tower, 4:Clam, 5:SalmonRun)
@@ -87,6 +98,11 @@ int32_t AnimationTimer6;
 int32_t AnimationTimer7;
 int32_t AnimationTimer8;
 bool PartialRendering = false;
+
+byte Missions = 0;
+byte MissionsB = 0;
+
+byte hitAnim = 0;
 
 bool IsPaused = false;
 int32_t PausedTimer = 0;
@@ -170,6 +186,25 @@ Color paletteFade1[] = {
   (Color)0x3415, //(Color)0x461b Light Blue
   (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
   (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
+};
+
+Color GlitchPalette[] = {  
+  (Color)0xf779, //(Color)0xf779 White
+  (Color)0x461b, //(Color)0xacd0 Grey
+  (Color)0xc9ae, //(Color)0x730b Dark Grey
+  (Color)0xf62f, //(Color)0x2923 Black
+  (Color)0xb15a, //(Color)0xb15a Purple
+  (Color)0xc9ae, //(Color)0xc9ae Magenta
+  (Color)0xe985, //(Color)0xe985 Red
+  (Color)0xfc03, //(Color)0xfc03 Orange
+  (Color)0xf5a2, //(Color)0xf5a2 Yellow
+  (Color)0x3415, //(Color)0x8624 Green
+  (Color)0x3291, //(Color)0x34a4 Dark Green
+  (Color)0xf5a2, //(Color)0x3291 Dark Blue
+  (Color)0xfc03, //(Color)0x3415 Blue
+  (Color)0xe985, //(Color)0x461b Light Blue
+  (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
+  (Color)0x2923  //(Color)0xcc47 Brown (Dark Skin)
 };
 
 Color palette[] = {  
