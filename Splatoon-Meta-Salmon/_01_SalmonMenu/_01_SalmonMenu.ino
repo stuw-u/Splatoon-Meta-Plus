@@ -1,6 +1,3 @@
-// INITIALIZATION
-/////////////////
-
 #include <Gamebuino-Meta.h>
 #include <math.h>
 
@@ -25,72 +22,15 @@
 //15: Difficulty
 //16: DifficultyB
 
-//17: Gender
-//18: Haircuts
+//17: PlayerHaircut
+//18: PlayerGender
 
 extern const uint8_t SquidSquare[];
 
 #define LCDWIDTH 80
 #define LCDHEIGHT 64
 
-#define AnimWALKSPEED 4
-#define AnimRUNSPEED 2
-
-//#define SCALE 8
-#define VFORCE 5
-
-#define BCOUNT 7
-#define PCOUNT 5
-
-#define STARTLENGHT 90
-#define STARTLENGHT2 130
-#define ENDSCREENLENGHT 110
-
-#define MapHeader 5
-
-//Player mouvement
-#define PSwimAcceleration 18 //How fast the player will reach the max speed when swiming in it's own ink
-#define PSwimMaxSpeed 116 //The maximum swiming speed 
-#define PESwimAcceleration 6 //How fast the player will reach the max speed when swiming in the ennemie ink
-#define PESwimMaxSpeed 48 //The maximum swiming speed 
-#define PGSwimAcceleration 7 //How fast the player will reach the max speed when squidding on the ground
-#define PGSwimMaxSpeed 62 //The maximum squid speed 
-#define PSwimWallClimb 84 //How fast the player can swim up a wall
-#define PSwimWallReleaseAcceleration 3 //How fast the player reach the max swim up a wall speed
-#define PSwimWallReleaseMaxSpeed 18 //The maximum releasing speed when swimming up a wall
-
-#define PJumpForceSquid 134 //The squid jump force
-#define PEJumpForceSquid 26 //The jump force when on ennemy ink
-
-#define PERestrictedSpeed 45 //The maximum velocity you can reach on ennemy ink
-#define PWalkMaxSpeed 84
-#define PWalkAcceleration 9
-#define PEWalkMaxSpeed 35
-#define PEWalkAcceleration 4
-
-#define PJumpForce 157 //The inkling jump force
-#define PEJumpForce 58 //The jump force when on ennemy ink
-#define PWallJumpForceX 68 //The inkling horizontal wall jump force
-#define PWallJumpForceY 104 //The inkling vertical wall jump force
-
-byte UseBackgroundInGame = true;
-byte cinematicSkip = 0;
-
-byte revertColors = 0;
-int16_t colorGroup = 1;
-
-int16_t cameraX, cameraY, shakeTimeLeft, shakeAmplitude;
-
-uint8_t cpuLoad = 0;
-uint8_t lastLoad[8];
-uint8_t difficulty = 0;
-uint8_t difficultyB = 0;
-
-//UI and Screen parameters
-bool IsPlaying = false;//true; //Starts game (GameState define mode, 0:Classic, 1:Rainmaker, 2:Zones, 3:Tower, 4:Clam, 5:SalmonRun)
-uint8_t GameState = 0; //0: TitleScreen, //1: Inkopolis, //2: WeaponShop, //3: HatShop, //4: GearSelect, //5: PlaySelection, //6: SalmonRunSelection, //7: CharSelect
-bool FreezePlayers = false;
-bool TutorialMode = false;
+uint8_t GameState = 0;
 int16_t AnimationTimer;
 int32_t AnimationTimer2;
 int32_t AnimationTimer3;
@@ -99,34 +39,12 @@ int32_t AnimationTimer5;
 int32_t AnimationTimer6;
 int32_t AnimationTimer7;
 int32_t AnimationTimer8;
-bool PartialRendering = false;
-
+bool IsPaused = false;
 byte Missions = 0;
 byte MissionsB = 0;
 
-byte hitAnim = 0;
-
-bool IsPaused = false;
-int32_t PausedTimer = 0;
-byte PausedSelection = 0;
-
 byte SelectedGender = 2; //0: F, 1: M, 2: N/A
 byte SelectedHaircut = 6; //4: N/A
-
-bool LastDirection = true;
-byte curX = 48;
-byte curY = 24;
-
-byte* D;
-byte V0 = 0;
-byte V1 = 0;
-byte V2 = 0;
-byte V3 = 0;
-byte V4 = 0;
-byte V5 = 0;
-byte V6 = 0;
-byte V7 = 0;
-byte cC = 0;
 
 Color paletteFlipBlackGrey[] = {  
   (Color)0xf779, //(Color)0xf779 White

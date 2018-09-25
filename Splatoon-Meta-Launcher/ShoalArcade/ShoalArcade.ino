@@ -111,7 +111,7 @@ void ChooseOption () {
   if(SelectOption == 0) {
     gb.bootloader.game("ShoalArcade/SPOONM.bin");
   } else if(SelectOption == 1) {
-    gb.bootloader.game("ShoalArcade/SALMON.bin");
+    gb.bootloader.game("ShoalArcade/SALMONMENU.bin");
   } else {
     gb.bootloader.game("ShoalArcade/SPOONM.bin");
   }

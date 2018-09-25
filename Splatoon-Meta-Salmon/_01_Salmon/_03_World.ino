@@ -374,8 +374,23 @@ class World {
         if(gt == 0 || Mul8(y) >= MapHeight*8-(WaterLevel-8)) {
           continue;
         }
-        
-        Tiles.setFrame(GetTile(x,y));
+
+        if(gt <= 9 || gt == 13) {
+          //Quick noshadow/noink draw
+          if(gt <= 9) {
+            NoShadow.setFrame(gt-1);
+          } else {
+            NoShadow.setFrame(9);
+          }
+          gb.display.drawImage(Mul8(x) - cameraX, Mul8(y) - cameraY, NoShadow);
+          continue;
+        }
+
+        if(gt == 10 || gt == 11 || gt == 12) {
+          Tiles.setFrame(gt-10);
+        } else {
+          Tiles.setFrame(gt-11);
+        }
         gb.display.drawImage(Mul8(x) - cameraX, Mul8(y) - cameraY, Tiles);
 
         if(RenderMode == 1) {
@@ -395,7 +410,7 @@ class World {
                 if(abs(x1)+abs(y1) > 1) {
                   continue;
                 } 
-                if(TilesParams_Array[GetTile(x+x1,y+y1)*5+0] == 0) {
+                if(TilesParams_Array[GetTile(x+x1,y+y1)*TileParamsCount+0] == 0) {
 
                   //Ink
                   if(cC == 0) {

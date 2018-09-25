@@ -310,6 +310,13 @@ class Salmonid:
     }
     if(type == 4) {
       y -= 3*8;
+      if(Div8(y)<(world.MapHeight*8-6*8)) {
+        if(Div64(x) < world.MapWidth/2) {
+          x += 8;
+        } else {
+          x -= 8;
+        } 
+      }
       return;
     }
     if((Div8(y)>(world.MapHeight*8-6*8) || (IsGroundedUp||IsGroundedDown||IsGroundedLeft||IsGroundedUp)) && !hasSpawned) {
@@ -352,7 +359,17 @@ class Salmonid:
       }
     }
 
-    if(turningCooldown%3 == 0 && type != 4 && type != 10 && type != 11) {
+    if(type == 5 && cooldown == 0) {
+      if(IsGroundedDown) {
+        world.SMSetPaintAtWallIndex(constrain(Div64(x),0,world.MapWidth-1), constrain(Div64(y)+1,0,world.MapWidth-1), 0, 0);
+      }
+      if(IsGroundedLeft) {
+        world.SMSetPaintAtWallIndex(constrain(Div8(Div8(x)-8),0,world.MapWidth-1), constrain(Div64(y),0,world.MapWidth-1), 1, 0);
+      }
+      if(IsGroundedRight) {
+        world.SMSetPaintAtWallIndex(constrain(Div8(Div8(x)+8),0,world.MapWidth-1), constrain(Div64(y),0,world.MapWidth-1), 3, 0);
+      }
+    } else if(turningCooldown%3 == 0 && type != 4 && type != 10 && type != 11) {
       if(IsGroundedDown) {
         world.SMSetPaintAtWallIndex(constrain(Div64(x),0,world.MapWidth-1), constrain(Div64(y)+1,0,world.MapWidth-1), 0, 1);
       }
@@ -425,7 +442,7 @@ class Salmonid:
         } else
         if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x),Div8(y)-getSHeight(),getWidth(),getSHeight())) {
           if(bulletsManager.bullets[i].color != 1) {
-            if(type == 4 && cooldown < 21) {
+            if(type == 4 && cooldown < 17/*cooldown < 21*/) {
               cooldown += 3;
 
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
@@ -534,8 +551,8 @@ class Salmonid:
           cooldown--;
         }
       }
-      bool PushRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/3)+0 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/2)) < getSHeight()+1;
-      bool AttackRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/2)) < getSHeight()+4;
+      bool PushRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/3)+0 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/4)) < getSHeight()/2+1;
+      bool AttackRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/4)) < getSHeight()/2+4;
       bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
       if(type == 3 && AttackRange || cooldown < 20) {
         if(cooldown > 0) {
@@ -597,8 +614,8 @@ class Salmonid:
       if(cooldown2 > 0) {
         cooldown2--;
       }
-      bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+1;
-      bool AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+4;
+      bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()*3/2+1;
+      bool AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()*3/2+4;
       if(cooldown > 0) {
         AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+0 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+0;
       }
@@ -611,11 +628,14 @@ class Salmonid:
         shakeTimeLeft = 3;
       }
       //knockback not working
-      if(PushRange) {
-        vx = constrain(-dir*-getSpeed()*0.5F,-140,140);
-      } else if((vx < 0 && dir == 1) || (vx > 0 && dir == -1) || (vx/VFORCE == 0)) {
-        if(cooldown == 0) {
-          vx = dir*-getSpeed()*(1+world.Anger/8/100);
+      if(cooldown == 0) {
+        if(PushRange) {
+          vx = constrain(-dir*-getSpeed()*0.5F,-140,140);
+          player.mainPlayer.vx += -dir*60;
+        } else if((vx < 0 && dir == 1) || (vx > 0 && dir == -1) || (vx/VFORCE == 0)) {
+          if(cooldown == 0) {
+            vx = dir*-getSpeed()*(1+world.Anger/8/100);
+          }
         }
       }
       if(InWater) {
@@ -842,7 +862,7 @@ class Salmonid:
         gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-4), MawsLight);
       } else
       if(cooldown >= 18) {
-        gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-17+8), Maws_Alert);
+        gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-10), Maws_Alert);
       } else if(cooldown >= 10) {
         Maws.setFrame(0);
         gb.display.drawImage(toScreenX(Div8(x)-14), toScreenY(Div8(y)-(17-cooldown)*3+(17-cooldown)/2), Maws);
@@ -1041,7 +1061,7 @@ class SalmonidManager {
         salmonids[i].Update();
       }
     }
-    if((cooldown == 0 || (activeSalmons <= 1 && cooldown < 70)) && abs(Div64(player.mainPlayer.x) - zonePositionA) < 11) {
+    if((cooldown == 0 || (activeSalmons <= 1 && cooldown < 70)) && (abs(Div64(player.mainPlayer.x) - zonePositionA) < 11 || (random(0,34)==2))) {
       //zonePosition
       if(Div8(world.WaterLevel) < 5) {
         for(int8_t x = 0; x < world.MapWidth/2; x++) {
@@ -1055,7 +1075,7 @@ class SalmonidManager {
       
       cooldown = 150 + random(0, 20);
       SpawnBatchAt(0, 1);
-    } else if((cooldown == 0 || (activeSalmons == 1 && cooldown < 70)) && abs(Div64(player.mainPlayer.x) - zonePositionB) < 11) {
+    } else if((cooldown == 0 || (activeSalmons == 1 && cooldown < 70)) && (abs(Div64(player.mainPlayer.x) - zonePositionB) < 11 || (random(0,34)==2))) {
       //zonePosition
       if(Div8(world.WaterLevel) < 5) {
         for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
@@ -1126,7 +1146,7 @@ class SalmonidManager {
 
     //
 
-    if(!Boss && random(0,4) != 0) {
+    if(!Boss && random(0,5) != 0) {
       byte salmon = 0;
       if(world.MaxEggs*5/8 > world.FlagEggs && random(0,3) != 0 && (world.FlagEggs < world.MaxEggs)) {
         Spawn(zonePosition*8-8, world.MapHeight*8-16, 3, dir);
@@ -1196,6 +1216,13 @@ class SalmonidManager {
         return;
       }
     }
+  }
+
+  void Clean () {
+    for(byte i = 0; i < SalmonidCount; i++) {
+      salmonids[i].alive = false;
+    }
+    activeSalmons = 0;
   }
 };
 
