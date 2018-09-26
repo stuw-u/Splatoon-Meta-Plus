@@ -10,6 +10,11 @@ void ResetGoldenEgg () {
   gb.save.set(7, (int32_t)0);
 }
 
+void MissionUpload () {
+  gb.save.set(5, Missions);
+  gb.save.set(6, MissionsB);
+}
+
 void MissionLoad () {
   Missions = gb.save.get(5);
   MissionsB = gb.save.get(6);
@@ -44,10 +49,16 @@ void setup() {
   gb.setFrameRate(25);
   gb.display.setFont(SquidSquare);
   gb.display.colorIndex = palette;
-  gb.sound.play("S/SLMN_LOOP.wav");
 
-  GameState = 0;
   MissionLoad();
+  if((bool)gb.save.get(19)) {
+    gb.save.set(19, (int32_t)0);
+    GameState = 1;
+    return;
+  }
+  
+  gb.sound.play("S/SLMN_LOOP.wav");
+  GameState = 0;
 }
 
 void CrossDraw(byte x, byte y) {
@@ -172,8 +183,8 @@ void loop () {
       IsPlaying = true;
       PrepareMap();
       GameState = 0;*/
-      gb.save.set(5, -1);
-      gb.save.set(6, (int32_t)0);
+      gb.save.set(15, -1);
+      gb.save.set(16, (int32_t)0);
       gb.bootloader.game("ShoalArcade/SALMON.bin");
       return;
     }
