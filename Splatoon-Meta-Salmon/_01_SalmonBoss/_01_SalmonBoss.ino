@@ -39,7 +39,7 @@ extern const uint8_t SquidSquare[];
 //#define SCALE 8
 #define VFORCE 5
 
-#define BCOUNT 7
+#define BCOUNT 20
 #define PCOUNT 5
 
 #define STARTLENGHT 90
@@ -80,6 +80,14 @@ byte revertColors = 0;
 int16_t colorGroup = 1;
 
 int16_t cameraX, cameraY, shakeTimeLeft, shakeAmplitude;
+int16_t cannonX, salmonX, aimX;
+int8_t googlyEyesX, googlyEyesY;
+
+bool Rocket = false;
+byte RocketY = 0;
+
+byte Bam1 = 0;
+byte Bam2 = 0;
 
 uint8_t cpuLoad = 0;
 uint8_t lastLoad[8];
@@ -90,7 +98,6 @@ uint8_t difficultyB = 0;
 bool IsPlaying = false;//true; //Starts game (GameState define mode, 0:Classic, 1:Rainmaker, 2:Zones, 3:Tower, 4:Clam, 5:SalmonRun)
 uint8_t GameState = 0; //0: TitleScreen, //1: Inkopolis, //2: WeaponShop, //3: HatShop, //4: GearSelect, //5: PlaySelection, //6: SalmonRunSelection, //7: CharSelect
 bool FreezePlayers = false;
-bool TutorialMode = false;
 int16_t AnimationTimer;
 int32_t AnimationTimer2;
 int32_t AnimationTimer3;
@@ -117,7 +124,6 @@ bool LastDirection = true;
 byte curX = 48;
 byte curY = 24;
 
-byte* D;
 byte V0 = 0;
 byte V1 = 0;
 byte V2 = 0;
@@ -318,7 +324,7 @@ Color palettePMagenta[] = {
   (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
 };
 
-Color palettePBlue[] = {  
+/*Color palettePBlue[] = {  
   (Color)0xf779, //(Color)0xf779 White
   (Color)0xacd0, //(Color)0xacd0 Grey
   (Color)0x730b, //(Color)0x730b Dark Grey
@@ -335,7 +341,7 @@ Color palettePBlue[] = {
   (Color)0x461b, //(Color)0x461b Light Blue
   (Color)0xf62f, //(Color)0xf62f Beige (Light Skin)
   (Color)0xcc47  //(Color)0xcc47 Brown (Dark Skin)
-};
+};*/
 
 Color palettePGreen[] = {  
   (Color)0xf779, //(Color)0xf779 White

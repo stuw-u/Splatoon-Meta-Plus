@@ -400,8 +400,11 @@ class Particle {
     if(type == 7) { //ExtraBig Spark
       return 5;
     }
-    if(type == 8) {//Missile Indicator
+    if(type == 8) { //Missile Indicator
       return 70;
+    }
+    if(type == 9) { //Anchor
+      return 255;
     }
   }
 
@@ -462,6 +465,12 @@ class Particle {
     if(type == 8 && ground) {//MissileIndicator
       gb.display.drawImage(toScreenX(x-4),toScreenY(y+1),MissileIndicator);
     }
+    if(type == 9) {
+      for(byte i = 0; i < 6; i++) {
+        gb.display.drawImage(toScreenX(x-2),toScreenY(y-21-i*12),Anchor_Chain);
+      }
+      gb.display.drawImage(toScreenX(x-7),toScreenY(y-16),Anchor);
+    }
     gb.display.colorIndex = palette;
   }
 
@@ -474,7 +483,7 @@ class Particle {
       return;
     }
 
-    if(type == 8 && !ground) {
+    if((type == 8 || type == 9) && !ground) {
       if(world.PixelInCollider(Div8(x),Div8(y),x%8,y%8,0) == 0) {
         y++;
       } else {
@@ -482,7 +491,15 @@ class Particle {
         y--;
       }
     }
-    if(type == 8 && !ground) {
+    if((type == 8 || type == 9)  && !ground) {
+      if(world.PixelInCollider(Div8(x),Div8(y),x%8,y%8,0) == 0) {
+        y++;
+      } else {
+        ground = true;
+        y--;
+      }
+    }
+    if(type == 9  && !ground) {
       if(world.PixelInCollider(Div8(x),Div8(y),x%8,y%8,0) == 0) {
         y++;
       } else {
@@ -491,7 +508,7 @@ class Particle {
       }
     }
     
-    if(timer <= 0 || ((x < cameraX || x > cameraX+LCDWIDTH || y < cameraY || y > cameraY+LCDHEIGHT) && type != 8)) {
+    if(timer <= 0 || ((x < cameraX || x > cameraX+LCDWIDTH || y < cameraY || y > cameraY+LCDHEIGHT) && type != 8 && type != 9)) {
       Destroy();
     }
     Draw();
@@ -531,6 +548,10 @@ class ParticleManager {
   void Update () {
     for(byte i = 0; i < PCOUNT; i++) {
       particles[i].Update();
+      if(particles[i].type == 9 && particles[i].ground) {
+        spawnParticle(particles[i].x-3,particles[i].y-5,7,0,1);
+        particles[i].Destroy();
+      }
     }
   }
 };

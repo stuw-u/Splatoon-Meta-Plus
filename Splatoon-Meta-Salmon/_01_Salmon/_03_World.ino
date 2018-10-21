@@ -458,7 +458,7 @@ class World {
         gb.display.fillRect(toScreenX(Mul8(x)), toScreenY(MapHeight*8-(WaterLevel + c)) + 8, 8, LCDHEIGHT-(toScreenY(MapHeight*8-(WaterLevel + c)) + 8));
       }
       WaterWave++;
-      if(WaterWave % 520 == 0) {
+      if(WaterWave % 480 == 0) {
         if(!TutorialMode) {
           WaterLevel++;
         }
@@ -474,8 +474,8 @@ class World {
   void Initialize (byte S) {
     FlagSet = false;
     FlagWave = 0;
-    MaxEggs = random(18,26);
-    MaxGolden = random(2,5);
+    MaxEggs = random(30,38);
+    MaxGolden = difficulty*2/3+3;
     FlagEggs = 0;
     FlagGolden = 0;
     WaterWave = 0;

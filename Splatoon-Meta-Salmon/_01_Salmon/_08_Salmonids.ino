@@ -129,26 +129,27 @@ class Salmonid:
   };
 
   int16_t getLive () {
+    byte boost = 32 + difficultyB*10;
     if(type == 0) {
-      return 60;
+      return 60*boost/32;
     } else if(type == 1) {
-      return 140;
+      return 140*boost/32;
     } else if(type == 2) {
-      return 140;
+      return 140*boost/32;
     } else if(type == 3) {
-      return 310;
+      return 310*boost/32;
     } else if(type == 4) {
-      return 420;
+      return 420*boost/32;
     } else if(type == 5) {
-      return 180;
+      return 180*boost/32;
     } else if(type == 6) {
       return 1;
     } else if(type == 7) {
       return 0;
     } else if(type == 8) {
-      return 210;
+      return 210*boost/32;
     } else if(type == 10 || type == 11) {
-      return 60;
+      return 60*boost/32;
     }
   }
 
@@ -443,7 +444,7 @@ class Salmonid:
         if(gb.collidePointRect(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),Div8(x),Div8(y)-getSHeight(),getWidth(),getSHeight())) {
           if(bulletsManager.bullets[i].color != 1) {
             if(type == 4 && cooldown < 17/*cooldown < 21*/) {
-              cooldown += 3;
+              cooldown += 2;
 
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
               Live-=bulletsManager.bullets[i].Damage;
@@ -543,9 +544,6 @@ class Salmonid:
 
     //Attack and collision of basic type salmonid 0-3
     if(type == 0 || type == 1 || type == 2 || type == 3 || type == 9) {
-      if(difficultyB == 1) {
-        Live++;
-      }
       if(type != 3) {
         if(cooldown > 0) {
           cooldown--;
@@ -592,7 +590,11 @@ class Salmonid:
           player.mainPlayer.vx += -dir*60;
         }
       } else if((vx < 0 && dir == 1) || (vx > 0 && dir == -1) || (abs(vx/VFORCE) <= 1)) {
-        vx = dir*-getSpeed()*(1+world.Anger/8/100);
+        if(InWater) {
+          vx = dir*-(getSpeed()*2)*(1+world.Anger/8/100);
+        } else {
+          vx = dir*-getSpeed()*(1+world.Anger/8/100);
+        }
       }
       if(InWater) {
         vy += 15;
@@ -614,10 +616,10 @@ class Salmonid:
       if(cooldown2 > 0) {
         cooldown2--;
       }
-      bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()*3/2+1;
-      bool AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()*3/2+4;
+      bool PushRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+1 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()/2+1;
+      bool AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()/2+4;
       if(cooldown > 0) {
-        AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+0 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()+0;
+        AttackRange = abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+0 && abs((Div8(player.mainPlayer.y)/*-player.mainPlayer.getHeight()*/) - (Div8(y)-getSHeight()/2)) < getSHeight()/2+2;
       }
       bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
       if(cooldown2 == 0 && IsGroundedDown && AttackRange && player.mainPlayer.RespawnTimer <= 0 && cooldown == 0) {
@@ -634,7 +636,11 @@ class Salmonid:
           player.mainPlayer.vx += -dir*60;
         } else if((vx < 0 && dir == 1) || (vx > 0 && dir == -1) || (vx/VFORCE == 0)) {
           if(cooldown == 0) {
-            vx = dir*-getSpeed()*(1+world.Anger/8/100);
+            if(InWater) {
+              vx = dir*-(getSpeed()*2)*(1+world.Anger/8/100);
+            } else {
+              vx = dir*-getSpeed()*(1+world.Anger/8/100);
+            }
           }
         }
       }
@@ -662,7 +668,7 @@ class Salmonid:
       if(AttackRange && cooldown >= 66) {
         cooldown=65;
       }
-
+      bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
       if(cooldown == 7 && IsGroundedDown && PushRange) {
         player.mainPlayer.vx += abs((Div8(player.mainPlayer.x)/*+player.mainPlayer.getWidth()/2*/) - (Div8(x)-4))*3;
         player.mainPlayer.vy += 50;
@@ -678,11 +684,19 @@ class Salmonid:
         if((IsGroundedLeft && -dir) || (IsGroundedRight && dir)) {
           y -= 8;
           vy = 0;
-          vx = 50*-dir;
+          if(InWater) {
+            vx = 100*-dir;
+          } else {
+            vx = 50*-dir;
+          }
         } else if(((IsGroundedLeft && dir) || (IsGroundedRight && -dir)) && !IsGroundedDown) {
           vx = 0;
         } else if(IsGroundedDown) {
-          vx = 50*-dir;
+          if(InWater) {
+            vx = 100*-dir;
+          } else {
+            vx = 50*-dir;
+          }
         } else if(!IsGroundedDown && vy < 0) {
           vx = 0;
         }
@@ -820,7 +834,7 @@ class Salmonid:
     }
 
 
-    if(Live < 0) {
+    if((Live < 0 && type != 9) || (BLive == 0 && type == 9)) {
       particleManager.spawnParticle(Div8(x),Div8(y),7,colorGroup,1);
       Kill(true);
     }
@@ -862,7 +876,7 @@ class Salmonid:
         gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-4), MawsLight);
       } else
       if(cooldown >= 18) {
-        gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-10), Maws_Alert);
+        gb.display.drawImage(toScreenX(Div8(x)-5), toScreenY(Div8(y)-14), Maws_Alert);
       } else if(cooldown >= 10) {
         Maws.setFrame(0);
         gb.display.drawImage(toScreenX(Div8(x)-14), toScreenY(Div8(y)-(17-cooldown)*3+(17-cooldown)/2), Maws);
@@ -1061,7 +1075,9 @@ class SalmonidManager {
         salmonids[i].Update();
       }
     }
-    if((cooldown == 0 || (activeSalmons <= 1 && cooldown < 70)) && (abs(Div64(player.mainPlayer.x) - zonePositionA) < 11 || (random(0,34)==0))) {
+    byte r1 = random(0,190);
+    byte r2 = random(0,190);
+    if((cooldown == 0 || (activeSalmons <= 1 && cooldown < 50)) && ((abs(Div64(player.mainPlayer.x) - zonePositionA) < 11) || r1==1)) {
       //zonePosition
       if(Div8(world.WaterLevel) < 5) {
         for(int8_t x = 0; x < world.MapWidth/2; x++) {
@@ -1073,9 +1089,9 @@ class SalmonidManager {
         }
       }
       
-      cooldown = 150 + random(0, 20);
+      cooldown = ((6-difficulty)*15)+85 + random(0, 20);
       SpawnBatchAt(0, 1);
-    } else if((cooldown == 0 || (activeSalmons == 1 && cooldown < 70)) && (abs(Div64(player.mainPlayer.x) - zonePositionB) < 11 || (random(0,34)==0))) {
+    } else if((cooldown == 0 || (activeSalmons == 1 && cooldown < 50)) && ((abs(Div64(player.mainPlayer.x) - zonePositionB) < 11) || r2==1)) {
       //zonePosition
       if(Div8(world.WaterLevel) < 5) {
         for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
@@ -1087,11 +1103,11 @@ class SalmonidManager {
         }
       }
       
-      cooldown = 150 + random(0, 20);
+      cooldown = ((6-difficulty)*15)+85 + random(0, 20);
       SpawnBatchAt(world.MapWidth-1, -1);
     } else {
       if(cooldown == 0) {
-        cooldown = 150 + random(0, 20);
+        cooldown = ((6-difficulty)*15)+85 + random(0, 20);
 
         if(Div8(world.WaterLevel) < 5) {
           for(int8_t x = 0; x < world.MapWidth/2; x++) {
@@ -1132,7 +1148,7 @@ class SalmonidManager {
     //Need help? Here's a drop. Power drop needs high sea level (2/3 <) and < 3/4 eggs max
     //Golden drop needs high sea level (1/2 <) and < 3/4 eggs max
     //Power priority, low chance of happening
-    if(random(0,7) == 0) {
+    if(random(0,5) == 0) {
       if(world.MaxEggs*3/4 > world.FlagEggs && (25*8)*2/3 < world.WaterLevel) {
         //Spawn a drop near player
         Spawn(Div8(player.mainPlayer.x)+random(-8,9), 4, 10, 1);
@@ -1146,24 +1162,24 @@ class SalmonidManager {
 
     //
 
-    if(!Boss && random(0,5) != 0) {
+    if(!Boss && random(0,11) != 0) {
       byte salmon = 0;
       if(world.MaxEggs*5/8 > world.FlagEggs && random(0,3) != 0 && (world.FlagEggs < world.MaxEggs)) {
         Spawn(zonePosition*8-8, world.MapHeight*8-16, 3, dir);
       } else {
         if(difficulty == 5 || difficulty == 6) {
-          salmon = random(3,8);
+          salmon = random(4,8);
           if(salmon == 7) {
             salmon = 9;
           }
           Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon, dir);
         } else
         if(difficulty == 3 || difficulty == 4) {
-          salmon = random(3,7);
+          salmon = random(4,7);
           Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon, dir);
         } else
         if(difficulty == 1 || difficulty == 2) {
-          salmon = random(3,6);
+          salmon = random(4,6);
           Spawn(zonePosition*8-8, world.MapHeight*8-16, salmon, dir);
         } else 
         if(difficulty == 0) {

@@ -255,35 +255,42 @@ void loop () {
         gb.display.setColor((ColorIndex)6);
         CrossDraw(17,53);
       }
-      if(AnimationTimer >= 24 && MissionReadIndex(4,0)) {
+      if(AnimationTimer >= 24 && MissionReadIndex(5,0)) {
         gb.display.setColor((ColorIndex)6);
         CrossDraw(15,14);
       }
-      if(AnimationTimer >= 25 && MissionReadIndex(5,0)) {
+      if(AnimationTimer >= 25 && MissionReadIndex(4,0)) {
         gb.display.setColor((ColorIndex)6);
         CrossDraw(12,26);
       }
-      if(AnimationTimer >= 26 && MissionReadIndex(6,0)) {
+      /*if(AnimationTimer >= 26 && MissionReadIndex(6,0)) {
         gb.display.setColor((ColorIndex)6);
         CrossDraw(12,26);
-      }
-      if(AnimationTimer == 28 && MissionReadIndex(7,0)) {
+      }*/
+      if(AnimationTimer == 28 && MissionReadIndex(6,0)) {
         gb.display.setColor((ColorIndex)0);
         gb.display.drawFastVLine(29,8,5);
         gb.display.drawFastHLine(26,11,5);
       }
-      if(AnimationTimer == 29 && MissionReadIndex(7,0)) {
+      if(AnimationTimer == 29 && MissionReadIndex(6,0)) {
         gb.display.setColor((ColorIndex)0);
         gb.display.drawFastVLine(29,9,3);
         gb.display.drawFastHLine(27,11,3);
       }
-      if(AnimationTimer >= 28 && MissionReadIndex(7,0)) {
+      if(AnimationTimer >= 28 && MissionReadIndex(6,0)) {
         gb.display.setColor((ColorIndex)7);
         gb.display.fillRect(28,10,3,3);
       }
-      if(AnimationTimer >= 27  && MissionReadIndex(7,0)) {
+      if(AnimationTimer >= 27  && MissionReadIndex(6,0)) {
         gb.display.setColor((ColorIndex)6);
         CrossDraw(29,11);
+        if(AnimationTimer4 == 6 && GetGoldenEgg() < 40) {
+          gb.display.drawImage(13, 14, EggsRemaining);
+          gb.display.setColor((ColorIndex)0);
+          gb.display.setCursor(21, 19);
+          gb.display.print(GetGoldenEgg());
+          gb.display.print("/40");
+        }
       }
       if(AnimationTimer >= 31) {
         if(AnimationTimer == 31) {
@@ -319,18 +326,20 @@ void loop () {
             gb.display.print("LOCK");
           }
           //LOCK/UNLOCKED
-          gb.display.setCursor(52,2+6+6+6+6+6);
-          gb.display.setColor((ColorIndex)2);
-          gb.display.print(AnimationTimer4+1);
-          gb.display.print(".B");
-          gb.display.setCursor(52,2+6+6+6+6+6+6);
-          //LOCK/UNLOCKED
-          if(MissionReadIndex(AnimationTimer4,1)) {
-            gb.display.setColor((ColorIndex)7);
-            gb.display.print("UNLOCK");
-          } else {
-            gb.display.setColor((ColorIndex)6);
-            gb.display.print("LOCK");
+          if(AnimationTimer4 != 6) {
+            gb.display.setCursor(52,2+6+6+6+6+6);
+            gb.display.setColor((ColorIndex)2);
+            gb.display.print(AnimationTimer4+1);
+            gb.display.print(".B");
+            gb.display.setCursor(52,2+6+6+6+6+6+6);
+            //LOCK/UNLOCKED
+            if(MissionReadIndex(AnimationTimer4,1)) {
+              gb.display.setColor((ColorIndex)7);
+              gb.display.print("UNLOCK");
+            } else {
+              gb.display.setColor((ColorIndex)6);
+              gb.display.print("LOCK");
+            }
           }
 
           gb.display.drawImage(51,58,Golden_Small);
@@ -339,7 +348,7 @@ void loop () {
           gb.display.print(GetGoldenEgg());
             
         } else {
-          if(AnimationTimer7 == 0 && gb.buttons.released(BUTTON_A) && MissionReadIndex(AnimationTimer4,0)) {
+          if(AnimationTimer7 == 0 && gb.buttons.released(BUTTON_A) && MissionReadIndex(AnimationTimer4,0) && (AnimationTimer4 != 6 || GetGoldenEgg() >= 40)) {
             AnimationTimer7 = 1;
             AnimationTimer8 = 1;
           } else
@@ -364,11 +373,16 @@ void loop () {
             player.mainPlayer.PlayerHaircut = SelectedHaircut;
             player.mainPlayer.hat = 0;
             GameState = 0;*/
-            gb.save.set(5, AnimationTimer4);
-            gb.save.set(6, AnimationTimer8-1);
+            gb.save.set(15, AnimationTimer4);
+            gb.save.set(16, AnimationTimer8-1);
             gb.save.set(18, SelectedGender);
             gb.save.set(17, SelectedHaircut);
-            gb.bootloader.game("ShoalArcade/SALMON.bin");
+            if(AnimationTimer4 == 6) {
+              gb.save.set(16, (int32_t)0);
+              gb.bootloader.game("ShoalArcade/SALMONBOSS.bin");
+            } else {
+              gb.bootloader.game("ShoalArcade/SALMON.bin");
+            }
           }
           
           if(AnimationTimer7 == 0) {
@@ -381,9 +395,9 @@ void loop () {
               gb.display.drawImage(72,55,Icon_B);
             }
           } else if(AnimationTimer7 > 0) {
-            if(gb.buttons.pressed(BUTTON_UP)) {
+            if(gb.buttons.pressed(BUTTON_UP) || AnimationTimer4 == 6) {
               AnimationTimer8 = 1;
-            } else if(gb.buttons.pressed(BUTTON_DOWN)) {
+            } else if(gb.buttons.pressed(BUTTON_DOWN) && AnimationTimer4 != 6) {
               AnimationTimer8 = 2;
             }
             
@@ -419,18 +433,20 @@ void loop () {
               gb.display.print(".A");
             }
 
-            if(AnimationTimer8==2) {
-              gb.display.setColor((ColorIndex)0);
-              gb.display.drawLine(52,16+6,54,18+6);
-              gb.display.drawLine(54,18+6,52,20+6);
-              gb.display.setCursor(57,16+6);
-              gb.display.print(AnimationTimer4+1);
-              gb.display.print(".B");
-            } else {
-              gb.display.setColor((ColorIndex)12);
-              gb.display.setCursor(52,16+6);
-              gb.display.print(AnimationTimer4+1);
-              gb.display.print(".B");
+            if(AnimationTimer4 != 6) {
+              if(AnimationTimer8==2) {
+                gb.display.setColor((ColorIndex)0);
+                gb.display.drawLine(52,16+6,54,18+6);
+                gb.display.drawLine(54,18+6,52,20+6);
+                gb.display.setCursor(57,16+6);
+                gb.display.print(AnimationTimer4+1);
+                gb.display.print(".B");
+              } else {
+                gb.display.setColor((ColorIndex)12);
+                gb.display.setCursor(52,16+6);
+                gb.display.print(AnimationTimer4+1);
+                gb.display.print(".B");
+              }
             }
           }
         }
@@ -485,48 +501,48 @@ void loop () {
           if(gb.buttons.pressed(BUTTON_RIGHT) && MissionReadIndex(1,0)) {
             AnimationTimer4=1;
           }
-          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(5,0)) {
-            AnimationTimer4=5;
+          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(4,0)) {
+            AnimationTimer4=4;
           }
         } else
         if(AnimationTimer4 == 3) {
           AnimationTimer5 = 17;
           AnimationTimer6 = 53;
-          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(5,0)) {
-            AnimationTimer4=5;
+          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(4,0)) {
+            AnimationTimer4=4;
           }
           if(gb.buttons.pressed(BUTTON_RIGHT) && MissionReadIndex(2,0)) {
             AnimationTimer4=2;
           }
         } else
-        if(AnimationTimer4 == 4) {
+        if(AnimationTimer4 == 5) {
           AnimationTimer5 = 16;
           AnimationTimer6 = 13;
-          if(gb.buttons.pressed(BUTTON_DOWN) && MissionReadIndex(5,0)) {
-            AnimationTimer4=5;
+          if(gb.buttons.pressed(BUTTON_DOWN) && MissionReadIndex(4,0)) {
+            AnimationTimer4=4;
           }
-          if(gb.buttons.pressed(BUTTON_LEFT) && MissionReadIndex(5,0)) {
-            AnimationTimer4=5;
+          if(gb.buttons.pressed(BUTTON_LEFT) && MissionReadIndex(4,0)) {
+            AnimationTimer4=4;
           }
           if(gb.buttons.pressed(BUTTON_RIGHT) && MissionReadIndex(6,0)) {
             AnimationTimer4=6;
           }
         } else
-        if(AnimationTimer4 == 5) {
+        if(AnimationTimer4 == 4) {
           AnimationTimer5 = 12;
           AnimationTimer6 = 25;
           if(gb.buttons.pressed(BUTTON_DOWN) && MissionReadIndex(3,0)) {
             AnimationTimer4=3;
           }
           if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(4,0)) {
-            AnimationTimer4=4;
+            AnimationTimer4=5;
           }
         } else
         if(AnimationTimer4 == 6) {
           AnimationTimer5 = 30;
           AnimationTimer6 = 10;
-          if(gb.buttons.pressed(BUTTON_LEFT) && MissionReadIndex(4,0)) {
-            AnimationTimer4=4;
+          if(gb.buttons.pressed(BUTTON_LEFT) && MissionReadIndex(5,0)) {
+            AnimationTimer4=5;
           }
           if(gb.buttons.pressed(BUTTON_RIGHT) && MissionReadIndex(0,0)) {
             AnimationTimer4=0;
@@ -850,6 +866,7 @@ void loop () {
     if(AnimationTimer8 > 7) {
       AnimationTimer8 = ((AnimationTimer8 * 80) + (7*20))/100;
     }
+
   }/* else*/
 
 

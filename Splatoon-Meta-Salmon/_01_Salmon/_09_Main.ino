@@ -642,6 +642,10 @@ void loop () {
           gb.display.drawLine(1,52+4,1+2,52+2);
           if(gb.buttons.released(BUTTON_A)) {
             difficulty++;
+            if(difficulty == 6) {
+              gb.save.set(16, (int32_t)0);
+              gb.bootloader.game("ShoalArcade/SALMONBOSS.bin");
+            }
             difficultyB = 0;
             AnimationTimer = 0;
             AnimationTimer2 = 0;
@@ -1164,7 +1168,7 @@ void loop () {
     
     if(UseBackgroundInGame && !PartialRendering) {
       gb.display.colorIndex = paletteBG;
-      Background.setFrame(0);
+      Background.setFrame(difficulty%3);
       gb.display.drawImage(0,0,Background);
       gb.display.colorIndex = palette;
     } else {
@@ -1180,8 +1184,8 @@ void loop () {
     bulletsManager.Update();
     for(byte i = 0; i < BCOUNT; i++) {
       if(bulletsManager.bullets[i].Type == 5) {
-        bulletsManager.bullets[i].vx = constrain(bulletsManager.bullets[i].vx + -(player.mainPlayer.x - bulletsManager.bullets[i].x)/15, -70, 70);
-        bulletsManager.bullets[i].vy = constrain(bulletsManager.bullets[i].vy + -(player.mainPlayer.y - bulletsManager.bullets[i].y)/15, -70, 70);
+        bulletsManager.bullets[i].vx = constrain(bulletsManager.bullets[i].vx + -(player.mainPlayer.x - bulletsManager.bullets[i].x)/(12+bulletsManager.bullets[i].Timer/10), -70, 70);
+        bulletsManager.bullets[i].vy = constrain(bulletsManager.bullets[i].vy + -((player.mainPlayer.y - Mul8(8)) - bulletsManager.bullets[i].y)/(12+bulletsManager.bullets[i].Timer/10), -70, 70);
       }
     }
     if(!TutorialMode || AnimationTimer6 > 0) {
@@ -1277,6 +1281,9 @@ void loop () {
           return;
         }
 
+        if(AnimationTimer8 == 0) {
+          gb.sound.play("S/SLMN_END.wav");
+        }
         AnimationTimer8++;
       }
 

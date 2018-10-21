@@ -13,57 +13,13 @@ void ClampCamera () { //Clamp the camera in the world
   cameraY = ClampInt(0,(world.MapHeight*8)-LCDHEIGHT,cameraY);
 }
 
-void MissionUpload () {
-  gb.save.set(5, Missions);
-  gb.save.set(6, MissionsB);
-}
-
-void MissionLoad () {
-  Missions = gb.save.get(5);
-  MissionsB = gb.save.get(6);
-}
-
-byte MissionReadIndex (byte Index, byte AB) {
-  if(AB == 0) {
-    return (Missions >> Index) & B00000001;
-  } else {
-    return (MissionsB >> Index) & B00000001;
-  }
-}
-
-void MissionWriteIndex (byte Index, byte AB, byte Value) {
-  if(AB == 0) {
-    if(Value == 1) {
-      Missions |= (1<<Index);
-    } else {
-      Missions &= ~(1<<Index);
-    }
-  } else {
-    if(Value == 1) {
-      MissionsB |= (1<<Index);
-    } else {
-      MissionsB &= ~(1<<Index);
-    }
-  }
-}
-
-uint16_t GetGoldenEgg () {
-  return gb.save.get(7);
-}
-
-void AddGoldenEgg (uint16_t Add) {
-  gb.save.set(7, (gb.save.get(7) + Add));
-}
-
-void ResetGoldenEgg () {
-  gb.save.set(7, (int32_t)0);
-}
-
 void PrepareMap () {
   world.SMResetMap();
   world.Initialize(gb.save.get(difficulty+8));
-  eggManager.Init();
   salmonidManager.cooldown = 80;
+  salmonidManager.wave = 0;
+  metawave = 0;
+  salmonidManager.nextRequest = -1;
   
   player.mainPlayer.x = world.GetSpawnPositionX();
   player.mainPlayer.y = world.GetSpawnPositionY();
@@ -84,20 +40,11 @@ void PrepareMap () {
   AnimationTimer2 = 1800; //Min*60*fps = Match Lenght
   AnimationTimer = STARTLENGHT;
 
-  gb.sound.play("S/SLMN_INTRO.wav");
   PausedTimer = -12;
   IsPaused = true;
 
 
   Background.setFrame(difficulty%2);
-  if(TutorialMode) {
-    Background.setFrame(2);
-    bulletsManager.spawnBullet(Mul64(12), Mul64(3), 0, -32, 1, 1, 0);
-    bulletsManager.spawnBullet(Mul64(13), Mul64(3), 0, -32, 1, 1, 0);
-    bulletsManager.spawnBullet(Mul64(14), Mul64(3), 0, -32, 1, 1, 0);
-
-    salmonidManager.Spawn(Mul8(31), Mul8(3), 1, 1);
-  }
 }
 
 void DrawCursor() {
@@ -471,26 +418,11 @@ void setup() {
   player.mainPlayer.PlayerGender = /*SelectedGender*/gb.save.get(17);
   player.mainPlayer.PlayerHaircut = /*SelectedHaircut*/gb.save.get(18);
   mainWeapon = gb.save.get(2);
-  MissionLoad();
-
-  if(gb.save.get(8) == 0) {
-    gb.save.set(8,random(1,255));
-    gb.save.set(9,random(1,255));
-    gb.save.set(10,random(1,255));
-    gb.save.set(11,random(1,255));
-    gb.save.set(12,random(1,255));
-    gb.save.set(13,random(1,255));
-    gb.save.set(14,random(1,255));
-  }
 
   IsPlaying = true;
   GameState = 0;
-  if(gb.save.get(15) == -1) {
-    TutorialMode = true;
-  } else {
-    difficulty = gb.save.get(15);
-  }
-  difficultyB = gb.save.get(16);
+  difficulty = 0;
+  difficultyB = 0;
   AnimationTimer = 0;
   AnimationTimer2 = 0;
   AnimationTimer3 = 0;
@@ -500,6 +432,7 @@ void setup() {
   AnimationTimer7 = 0;
   AnimationTimer8 = 0;
   PrepareMap();
+  gb.sound.play("S/SLMN_INTRO.wav");
 }
 
 byte Mode = 0;
@@ -515,7 +448,7 @@ void loop () {
       gb.save.set(19, 1);
       gb.bootloader.game("ShoalArcade/SALMONMENU.bin");
     }
-    
+
     if(GameState == 2) {
       gb.display.setColor((ColorIndex)3);
       gb.display.fill();
@@ -523,7 +456,7 @@ void loop () {
         gb.display.setColor((ColorIndex)7);
         gb.display.setFontSize(2);
         gb.display.setCursor(2,2);
-        gb.display.print(enText[33]);
+        gb.display.print(enText[4]);
         gb.display.setFontSize(1);
       } else if(AnimationTimer8 == 2) {
         //GLITCH
@@ -533,7 +466,7 @@ void loop () {
         gb.display.setColor((ColorIndex)6);
         gb.display.setFontSize(2);
         gb.display.setCursor(2,2);
-        gb.display.print(enText[33]);
+        gb.display.print(enText[4]);
         
         gb.display.drawImage(5,4+14,gb.display,0,4,58,3);
         gb.display.drawImage(6,9+14,gb.display,0,9,58,1);
@@ -549,243 +482,15 @@ void loop () {
       if(AnimationTimer8 == 4) {
         gb.display.setColor((ColorIndex)6);
         gb.display.setCursor(2,14);
-        for(byte i = 0; i < strlen(enText[34]); i++ ) {
-          if(enText[1][i] != ' ' && enText[34][i] != '.') {
+        for(byte i = 0; i < strlen(enText[5]); i++ ) {
+          if(enText[1][i] != ' ' && enText[5][i] != '.') {
             gb.display.print(randomC[random(0,strlen(randomC))]);
           }
         }
       } else if(AnimationTimer8 > 4) {
         gb.display.setColor((ColorIndex)6);
         gb.display.setCursor(2,14);
-        gb.display.print(enText[34]);
-      }
-      
-      if(AnimationTimer8 == 5) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,20);
-        for(byte i = 0; i < strlen(enText[35]); i++ ) {
-          if(enText[1][i] != ' ' && enText[35][i] != '.') {
-            gb.display.print(randomC[random(0,strlen(randomC))]);
-          }
-        }
-      } else if(AnimationTimer8 > 5) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,20);
-        gb.display.print(enText[35]);
-        gb.display.print(world.FlagEggs);
-      }
-
-      if(AnimationTimer8 == 6) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,26);
-        for(byte i = 0; i < strlen(enText[36]); i++ ) {
-          if(enText[1][i] != ' ' && enText[36][i] != '.') {
-            gb.display.print(randomC[random(0,strlen(randomC))]);
-          }
-        }
-      } else if(AnimationTimer8 > 6) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,26);
-        gb.display.print(enText[36]);
-        gb.display.print(world.FlagGolden);
-      }
-
-      if(AnimationTimer8 == 12 || AnimationTimer8 == 14 || AnimationTimer8 == 15 || AnimationTimer8 >= 17) {
-        gb.display.setCursor(1,40);
-        if(AnimationTimer == 0) {
-          gb.display.setCursor(5,40);
-          gb.display.setColor((ColorIndex)10);
-          gb.display.drawLine(1,40,1+2,40+2);
-          gb.display.drawLine(1,40+4,1+2,40+2);
-          if(gb.buttons.released(BUTTON_A)) {
-            AnimationTimer = 0;
-            AnimationTimer2 = 0;
-            AnimationTimer3 = 0;
-            AnimationTimer4 = 0;
-            AnimationTimer5 = 0;
-            AnimationTimer7 = 0;
-            AnimationTimer8 = 0;
-            GameState = 1;
-          }
-        } else {
-          gb.display.setColor((ColorIndex)9);
-        }
-        gb.display.print(enText[38]);
-        gb.display.setCursor(1,46);
-        if(AnimationTimer == 1) {
-          gb.display.setCursor(5,46);
-          gb.display.setColor((ColorIndex)10);
-          gb.display.drawLine(1,46,1+2,46+2);
-          gb.display.drawLine(1,46+4,1+2,46+2);
-          if(gb.buttons.released(BUTTON_A)) {
-            AnimationTimer = 0;
-            AnimationTimer2 = 0;
-            AnimationTimer3 = 0;
-            AnimationTimer4 = 0;
-            AnimationTimer5 = 0;
-            AnimationTimer6 = 0;
-            AnimationTimer7 = 0;
-            TutorialMode = false;
-            IsPlaying = true;
-            PrepareMap();
-            GameState = 0;
-          }
-        } else {
-          gb.display.setColor((ColorIndex)9);
-        }
-        gb.display.print(enText[39]);
-        gb.display.setCursor(1,52);
-        if(AnimationTimer == 2) {
-          gb.display.setCursor(5,52);
-          gb.display.setColor((ColorIndex)10);
-          gb.display.drawLine(1,52,1+2,52+2);
-          gb.display.drawLine(1,52+4,1+2,52+2);
-          if(gb.buttons.released(BUTTON_A)) {
-            difficulty++;
-            difficultyB = 0;
-            AnimationTimer = 0;
-            AnimationTimer2 = 0;
-            AnimationTimer3 = 0;
-            AnimationTimer4 = 0;
-            AnimationTimer5 = 0;
-            AnimationTimer6 = 0;
-            AnimationTimer7 = 0;
-            TutorialMode = false;
-            IsPlaying = true;
-            PrepareMap();
-            GameState = 0;
-          }
-        } else {
-          gb.display.setColor((ColorIndex)9);
-        }
-        gb.display.print(enText[40]);
-        if(difficultyB == 0) {
-          gb.display.print(difficulty+2);
-          gb.display.print(".A");
-        } else {
-          gb.display.print(difficulty+2);
-          gb.display.print(".A");
-        }
-        gb.display.setCursor(1,58);
-        if(AnimationTimer == 3) {
-          gb.display.setCursor(5,58);
-          gb.display.setColor((ColorIndex)10);
-          gb.display.drawLine(1,58,1+2,58+2);
-          gb.display.drawLine(1,58+4,1+2,58+2);
-          if(gb.buttons.released(BUTTON_A) && difficultyB == 0) {
-            difficultyB = 1;
-            AnimationTimer = 0;
-            AnimationTimer2 = 0;
-            AnimationTimer3 = 0;
-            AnimationTimer4 = 0;
-            AnimationTimer5 = 0;
-            AnimationTimer6 = 0;
-            AnimationTimer7 = 0;
-            TutorialMode = false;
-            IsPlaying = true;
-            PrepareMap();
-            GameState = 0;
-          }
-        } else {
-          gb.display.setColor((ColorIndex)9);
-        }
-        gb.display.print(enText[40]);
-        if(difficultyB == 0) {
-          gb.display.print(difficulty+1);
-          gb.display.print(".B");
-        } else {
-          gb.display.print(enText[41]);
-          gb.display.print(difficulty+1);
-        }
-
-        if(gb.buttons.repeat(BUTTON_UP, 5)) {
-          AnimationTimer--;
-        }
-        if(gb.buttons.repeat(BUTTON_DOWN, 5)) {
-          AnimationTimer++;
-        }
-        AnimationTimer = constrain(AnimationTimer, 0, 3);
-      }
-      
-      if(AnimationTimer8 < 20) {
-        AnimationTimer8++;
-      }
-    }
-    
-
-
-    if(GameState == 3) {
-      gb.display.setColor((ColorIndex)3);
-      gb.display.fill();
-      if(AnimationTimer8 == 1 || AnimationTimer8 >= 3) {
-        gb.display.setColor((ColorIndex)7);
-        gb.display.setFontSize(2);
-        gb.display.setCursor(2,2);
-        gb.display.print(enText[33]);
-        gb.display.setFontSize(1);
-      } else if(AnimationTimer8 == 2) {
-        //GLITCH
-        AnimationTimer = 0;
-        gb.display.setColor((ColorIndex)3);
-        gb.display.fill();
-        gb.display.setColor((ColorIndex)6);
-        gb.display.setFontSize(2);
-        gb.display.setCursor(2,2);
-        gb.display.print(enText[33]);
-        
-        gb.display.drawImage(5,4+14,gb.display,0,4,58,3);
-        gb.display.drawImage(6,9+14,gb.display,0,9,58,1);
-        gb.display.setColor((ColorIndex)3);
-        gb.display.fillRect(2,4,58,3);
-        gb.display.fillRect(2,9,58,1);
-        gb.display.drawImage(5,4,gb.display,5,4+14,58,3);
-        gb.display.drawImage(6,9,gb.display,6,9+14,58,1);
-        gb.display.fillRect(2,14,58,10);
-        gb.display.setFontSize(1);
-      }
-      
-      if(AnimationTimer8 == 4) {
-        gb.display.setColor((ColorIndex)6);
-        gb.display.setCursor(2,14);
-        for(byte i = 0; i < strlen(enText[37]); i++ ) {
-          if(enText[1][i] != ' ' && enText[37][i] != '.') {
-            gb.display.print(randomC[random(0,strlen(randomC))]);
-          }
-        }
-      } else if(AnimationTimer8 > 4) {
-        gb.display.setColor((ColorIndex)6);
-        gb.display.setCursor(2,14);
-        gb.display.print(enText[37]);
-      }
-      
-      if(AnimationTimer8 == 5) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,20);
-        for(byte i = 0; i < strlen(enText[35]); i++ ) {
-          if(enText[1][i] != ' ' && enText[35][i] != '.') {
-            gb.display.print(randomC[random(0,strlen(randomC))]);
-          }
-        }
-      } else if(AnimationTimer8 > 5) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,20);
-        gb.display.print(enText[35]);
-        gb.display.print(world.FlagEggs);
-      }
-
-      if(AnimationTimer8 == 6) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,26);
-        for(byte i = 0; i < strlen(enText[36]); i++ ) {
-          if(enText[1][i] != ' ' && enText[36][i] != '.') {
-            gb.display.print(randomC[random(0,strlen(randomC))]);
-          }
-        }
-      } else if(AnimationTimer8 > 6) {
-        gb.display.setColor((ColorIndex)2);
-        gb.display.setCursor(2,26);
-        gb.display.print(enText[36]);
-        gb.display.print(world.FlagGolden);
+        gb.display.print(enText[5]);
       }
 
       if(AnimationTimer8 == 12 || AnimationTimer8 == 14 || AnimationTimer8 == 15 || AnimationTimer8 >= 17) {
@@ -796,6 +501,7 @@ void loop () {
           gb.display.drawLine(1,52,1+2,52+2);
           gb.display.drawLine(1,52+4,1+2,52+2);
           if(gb.buttons.released(BUTTON_A)) {
+            //EXIT
             AnimationTimer = 0;
             AnimationTimer2 = 0;
             AnimationTimer3 = 0;
@@ -809,7 +515,7 @@ void loop () {
         } else {
           gb.display.setColor((ColorIndex)9);
         }
-        gb.display.print(enText[38]);
+        gb.display.print(enText[6]);
         gb.display.setCursor(1,58);
         if(AnimationTimer == 1) {
           gb.display.setCursor(5,58);
@@ -817,6 +523,8 @@ void loop () {
           gb.display.drawLine(1,58,1+2,58+2);
           gb.display.drawLine(1,58+4,1+2,58+2);
           if(gb.buttons.released(BUTTON_A)) {
+            gb.sound.stop(0);
+            gb.sound.play("SLMN_INTRO.wav");
             AnimationTimer = 0;
             AnimationTimer2 = 0;
             AnimationTimer3 = 0;
@@ -824,7 +532,6 @@ void loop () {
             AnimationTimer5 = 0;
             AnimationTimer6 = 0;
             AnimationTimer7 = 0;
-            TutorialMode = false;
             IsPlaying = true;
             PrepareMap();
             GameState = 0;
@@ -832,8 +539,7 @@ void loop () {
         } else {
           gb.display.setColor((ColorIndex)9);
         }
-        gb.display.print(enText[39]);
-        
+        gb.display.print(enText[7]);
 
         if(gb.buttons.repeat(BUTTON_UP, 5)) {
           AnimationTimer--;
@@ -849,11 +555,20 @@ void loop () {
       }
     }
   }
+    
   
   if(IsPlaying && GameState == 0) {
     if(IsPaused) {
       if(PausedTimer < 0) {
         gb.display.setColor((ColorIndex)3);
+        if(PausedTimer == -13) {
+          gb.display.fill();
+          if(player.mainPlayer.RespawnTimer > 0) {
+            player.mainPlayer.RespawnTimer--;
+            PausedTimer++;
+          }
+          return;
+        }
         gb.display.fillRect(0,0,80,VerticalClosing[abs(PausedTimer+1)]);
         gb.display.fillRect(0,64-VerticalClosing[abs(PausedTimer+1)],80,VerticalClosing[abs(PausedTimer+1)]);
         gb.display.fillRect(0,VerticalClosing[abs(PausedTimer+1)],HorizontalClosing[abs(PausedTimer+1)],(64-(VerticalClosing[abs(PausedTimer+1)]*2)));
@@ -965,32 +680,6 @@ void loop () {
                 gb.display.print(randomC[random(0,strlen(randomC))]);
               }
             }
-          } else if(PausedTimer <= 23) {
-            //Continue 
-            //Return to map
-            //Restart mission
-            //Bugged Mark area as
-            gb.display.setColor((ColorIndex)7);
-            gb.display.drawLine(2,14,4,16);
-            gb.display.drawLine(2,18,3,17);
-            
-            gb.display.setCursor(6,14);
-            gb.display.print(enText[1]);
-            
-            gb.display.setColor((ColorIndex)6);
-            gb.display.setCursor(2,20);
-            gb.display.print(enText[2]);
-
-            gb.display.setCursor(2,26);
-            gb.display.print(enText[3]);
-
-            gb.display.setCursor(2,32);
-            for(byte i = 0; i < strlen(enText[4]); i++ ) {
-              if(enText[1][i] != ' ' && enText[4][i] != '.') {
-                gb.display.print(randomC[random(0,strlen(randomC))]);
-              }
-            }
-            PausedSelection = 0;
           } else if(PausedSelection<4) {
             //NORMAL
             gb.display.setColor((ColorIndex)7);
@@ -1062,20 +751,7 @@ void loop () {
             gb.display.print(enText[3]);
             gb.display.setColor((ColorIndex)6);
 
-            if(PausedSelection==3) {
-              gb.display.setColor((ColorIndex)7);
-              if(gb.buttons.repeat(BUTTON_A,0)) {
-                gb.display.setColor((ColorIndex)8);
-              }
-              if(gb.buttons.released(BUTTON_A)) {
-                PausedSelection = 4;
-              }
-            }
-            gb.display.setCursor(2+(4*(PausedSelection==3)),32);
-            gb.display.print(enText[4]);
-            gb.display.setColor((ColorIndex)6);
-
-            if((gb.buttons.pressed(BUTTON_DOWN) || (gb.buttons.timeHeld(BUTTON_DOWN) > 8 && gb.buttons.repeat(BUTTON_DOWN,3))) && PausedSelection+1 < 4) {
+            if((gb.buttons.pressed(BUTTON_DOWN) || (gb.buttons.timeHeld(BUTTON_DOWN) > 8 && gb.buttons.repeat(BUTTON_DOWN,3))) && PausedSelection+1 < 3) {
               PausedSelection++;
             }
             if((gb.buttons.pressed(BUTTON_UP) || (gb.buttons.timeHeld(BUTTON_UP) > 8 && gb.buttons.repeat(BUTTON_UP,3))) && PausedSelection > 0) {
@@ -1151,7 +827,14 @@ void loop () {
         }
       }
       gb.display.setFontSize(1);
-      PausedTimer++;
+      if(player.mainPlayer.RespawnTimer > 0 && PausedTimer >= 11) {
+        PausedTimer = -13;
+        IsPaused = true;
+        return;
+      }
+      if(!(player.mainPlayer.RespawnTimer > 0 && PausedTimer < 0)) {
+        PausedTimer++;
+      }
       if(PausedTimer-1 >= 0) {
         return;
       }
@@ -1163,10 +846,85 @@ void loop () {
     }
     
     if(UseBackgroundInGame && !PartialRendering) {
+      cannonX = (-(cameraX-17*4)/8);
+      aimX = (-(cameraX-17*7)/12);
+      salmonX = (-(cameraX-17*8)/16);
+      
+      googlyEyesX = ((cameraX-17*4)/64);
+      googlyEyesY = ((cameraY)/16);
+      
       gb.display.colorIndex = paletteBG;
       Background.setFrame(0);
       gb.display.drawImage(0,0,Background);
       gb.display.colorIndex = palette;
+      
+      gb.display.drawImage(19+salmonX, 45, Boss_Bottom);
+      if(world.WaterWave/16%2==0) {
+        gb.display.drawImage(22+salmonX, 13, Boss_Closed);
+        gb.display.setColor((ColorIndex)6);
+        gb.display.drawPixel(22+salmonX+11,15+14);
+        gb.display.drawPixel(22+salmonX+24,15+14);
+        gb.display.setColor((ColorIndex)3);
+        gb.display.drawPixel(22+salmonX+11+googlyEyesX,14+14+googlyEyesY);
+        gb.display.drawPixel(22+salmonX+24+googlyEyesX,14+14+googlyEyesY);
+      } else {
+        gb.display.drawImage(22+salmonX, 13, Boss_Open);
+        gb.display.setColor((ColorIndex)6);
+        gb.display.drawPixel(22+salmonX+11,15+12);
+        gb.display.drawPixel(22+salmonX+24,15+12);
+        gb.display.setColor((ColorIndex)3);
+        gb.display.drawPixel(22+salmonX+11+googlyEyesX,14+12+googlyEyesY);
+        gb.display.drawPixel(22+salmonX+24+googlyEyesX,14+12+googlyEyesY);
+      }
+      
+      gb.display.drawImage(4+cannonX, 22, Boss_Canon, 11, 42);
+      if(Bam1 > 0) {
+        gb.display.drawImage(7+cannonX, 21, Boss_CanonSpark, 9, 9);
+        Bam1--;
+      }
+      gb.display.drawImage(65+cannonX, 22, Boss_Canon, -11, 42);
+      if(Bam2 > 0) {
+        gb.display.drawImage(64+cannonX, 21, Boss_CanonSpark, -9, 9);
+        Bam2--;
+      }
+
+      if(Rocket) {
+        if(RocketY < 28) {
+          gb.display.drawImage(36+aimX, 22, HitbackRocket_Aim);
+          gb.display.drawImage(36+aimX, -9+RocketY, HitbackRocket_Return);
+        } else {
+          RedSparkEyes.setFrame(RocketY-28);
+          if(world.WaterWave/16%2==0) {
+            gb.display.drawImage(22+salmonX+11+googlyEyesX-7,14+14+googlyEyesY-7,RedSparkEyes);
+            gb.display.drawImage(22+salmonX+24+googlyEyesX-7,14+14+googlyEyesY-7,RedSparkEyes);
+          } else {
+            gb.display.drawImage(22+salmonX+11+googlyEyesX-7,14+12+googlyEyesY-7,RedSparkEyes);
+            gb.display.drawImage(22+salmonX+24+googlyEyesX-7,14+12+googlyEyesY-7,RedSparkEyes);
+          }
+        }
+        if(RocketY > 25 && RocketY < 25+4) {
+          gb.display.drawImage(36+aimX-3, 22-3, HitSpark_White);
+        }
+        
+        if(RocketY < 28+13) {
+          RocketY++;
+        } else {
+          RocketY = 0;
+          Rocket = false;
+          if(metawave == 3) {
+            AnimationTimer = 0;
+            AnimationTimer2 = 0;
+            AnimationTimer3 = 0;
+            AnimationTimer4 = 0;
+            AnimationTimer5 = 0;
+            AnimationTimer6 = 0;
+            AnimationTimer7 = 0;
+            IsPlaying = false;
+            GameState = 2;
+            gb.sound.play("S/SLMN_END.wav");
+          }
+        }
+      }
     } else {
       gb.display.setColor((ColorIndex)12);
       gb.display.fill();
@@ -1176,17 +934,14 @@ void loop () {
     salmonidManager.UpdateGlobal();
     world.Update(0);
     salmonidManager.UnSpawnedGlobalUpdate();
-    eggManager.UpdateGlobal();
     bulletsManager.Update();
     for(byte i = 0; i < BCOUNT; i++) {
       if(bulletsManager.bullets[i].Type == 5) {
-        bulletsManager.bullets[i].vx = constrain(bulletsManager.bullets[i].vx + -(player.mainPlayer.x - bulletsManager.bullets[i].x)/15, -70, 70);
-        bulletsManager.bullets[i].vy = constrain(bulletsManager.bullets[i].vy + -(player.mainPlayer.y - bulletsManager.bullets[i].y)/15, -70, 70);
+        bulletsManager.bullets[i].vx = constrain(bulletsManager.bullets[i].vx + -(player.mainPlayer.x - bulletsManager.bullets[i].x)/(15+bulletsManager.bullets[i].Timer/7), -70, 70);
+        bulletsManager.bullets[i].vy = constrain(bulletsManager.bullets[i].vy + -((player.mainPlayer.y - Mul8(14)) - bulletsManager.bullets[i].y)/(15+bulletsManager.bullets[i].Timer/7), -70, 70);
       }
     }
-    if(!TutorialMode || AnimationTimer6 > 0) {
-      DrawCursor();
-    }
+    DrawCursor();
 
     particleManager.Update();
 
@@ -1194,12 +949,9 @@ void loop () {
       if((Weapons[mainWeapon][0]) == 2 && gb.buttons.repeat(BUTTON_A,0)) {
         cameraX = (cameraX*5+(Div8(player.mainPlayer.x)+4-(LCDWIDTH/2) + ((curX-LCDWIDTH/2)/6)*10 + (-player.mainPlayer.vx/5)))/6;
         cameraY = (cameraY*4+(Div8(player.mainPlayer.y)+4-(LCDHEIGHT/2) + ((curY-LCDWIDTH/2)/6)*12 + (-player.mainPlayer.vy/5)))/5;
-      } else if(!Tutorial) {
-        cameraX = (cameraX*5+(Div8(player.mainPlayer.x)+4-(LCDWIDTH/2) + ((curX-LCDWIDTH/2)/4)*3 + (-player.mainPlayer.vx/5)))/6;
-        cameraY = (cameraY*4+(Div8(player.mainPlayer.y)+4-(LCDHEIGHT/2) + ((curY-LCDWIDTH/2)/6)*4 + (-player.mainPlayer.vy/5)))/5;
       } else {
         cameraX = (cameraX*5+(Div8(player.mainPlayer.x)+4-(LCDWIDTH/2) + ((curX-LCDWIDTH/2)/4)*3 + (-player.mainPlayer.vx/5)))/6;
-        cameraY = (cameraY*4+(Div8(player.mainPlayer.y)+4-(LCDHEIGHT/2) + ((curY-LCDWIDTH/2+16)/6)*4 + (-player.mainPlayer.vy/5)))/5;
+        cameraY = (cameraY*4+(Div8(player.mainPlayer.y)+4-(LCDHEIGHT/2) + ((curY-LCDWIDTH/2)/6)*4 + (-player.mainPlayer.vy/5)))/5;
       }
     }
     
@@ -1259,7 +1011,7 @@ void loop () {
       }
       gb.display.colorIndex = palette;
 
-      if(world.FlagEggs >= world.MaxEggs && world.FlagGolden >= world.MaxGolden && !TutorialMode) {
+      /*if(world.FlagEggs >= world.MaxEggs && world.FlagGolden >= world.MaxGolden && !TutorialMode) {
         //Ending Cinematics!
         if(AnimationTimer8 > 220) {
           AddGoldenEgg(world.FlagGolden);
@@ -1278,301 +1030,26 @@ void loop () {
         }
 
         AnimationTimer8++;
-      }
+      }*/
+     
 
-      if(world.WaterLevel > world.MapHeight*8-6*8 && !TutorialMode) {
-        AnimationTimer = 0;
-        AnimationTimer8 = 0;
-        IsPlaying = false;
-        GameState = 3;
+      
+      gb.display.setColor((ColorIndex)7);
+      byte size = player.mainPlayer.Refill*7/100;
+      byte fillsize = constrain(size,0,7);
+      if(player.mainPlayer.Refill <= 0) {
+        fillsize = 0;
+      }
+      gb.display.fillRect(74,55,5,fillsize);
+      for(int8_t y = fillsize-1; y >= 0; y--) {
+        gb.display.drawFastHLine(74,61-y,5);
+      }
+      if(fillsize < 0) {
         return;
       }
-      
-      if(!TutorialMode || AnimationTimer6 > 3) {
-        EggSlot.setFrame(player.mainPlayer.HasGoldenEgg);
-        gb.display.drawImage(1,LCDHEIGHT-8,EggSlot);
-        gb.display.drawImage(1,1,SalmonHud);
-        gb.display.setColor((ColorIndex)0);
-        char text[2];
-
-        //Eggs
-        gb.display.cursorX = 12;
-        gb.display.cursorY = 2;
-        sprintf(text,"%02d",world.FlagEggs);
-        //sprintf(text,"%02d",salmonidManager.cooldown);
-        gb.display.print(text);
-        gb.display.print("/");
-        sprintf(text,"%02d",world.MaxEggs);
-        gb.display.print(text);
-
-        //Golden Eggs
-        gb.display.cursorX = 55;
-        gb.display.cursorY = 2;
-        sprintf(text,"%02d",world.FlagGolden);
-        gb.display.print(text);
-        gb.display.print("/");
-        sprintf(text,"%02d",world.MaxGolden);
-        gb.display.print(text);
-
-        //Anger
-        gb.display.setColor((ColorIndex)7);
-        gb.display.fillRect(10,11,world.Anger*28/100,3);
-
-      
-        gb.display.setColor((ColorIndex)7);
-        gb.display.drawRect(74,54,5,9);
-      }
-
-      
-      if(!TutorialMode || AnimationTimer6 > 2) {
-        gb.display.setColor((ColorIndex)7);
-        byte size = player.mainPlayer.Refill*7/100;
-        byte fillsize = constrain(size,0,7);
-        if(player.mainPlayer.Refill <= 0) {
-          fillsize = 0;
-        }
-        //gb.display.fillRect(74,55,5,fillsize);
-        for(int8_t y = fillsize-1; y >= 0; y--) {
-          gb.display.drawFastHLine(74,61-y,5);
-        }
-        if(fillsize < 0) {
-          return;
-        }
-        gb.display.setColor((ColorIndex)10);
-        gb.display.drawFastHLine(74,54,5);
-        gb.display.drawFastHLine(74,62,5);
-      }
-
-      if(TutorialMode) {
-        gb.display.setColor((ColorIndex)0, (ColorIndex)3);
-        if(AnimationTimer6 == 0) {
-          gb.display.setCursor(1,64-1-6-1-6);
-          if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-            AnimationTimer7 = 1;
-          }
-          if(AnimationTimer7 == 0) {
-            gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
-            gb.display.print(enText[10]);
-          } else {
-            gb.display.drawImage(80-1-18, 1, B_Push);
-            gb.display.print(enText[11]);
-          }
-        }
-        
-        if(AnimationTimer6 == 1) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
-          gb.display.drawImage(80-1-18, 1, A_Push);
-          gb.display.print(enText[12]);
-          if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
-            AnimationTimer6 = 2;
-            AnimationTimer7 = 0;
-          }
-        }
-        
-        if(AnimationTimer6 == 2) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
-          if(AnimationTimer7 == 0 && Div64(player.mainPlayer.x) > 11) {
-            AnimationTimer7 = 1;
-          }
-          if(AnimationTimer7 == 1) {
-            gb.display.drawImage(80-1-18, 1, A_Push);
-            gb.display.print(enText[13]);
-
-            if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
-              AnimationTimer7 = 2;
-            }
-          } else
-          if(AnimationTimer7 == 2) {
-            gb.display.drawImage(80-1-18, 1, A_Push);
-            gb.display.print(enText[14]);
-
-            if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
-              AnimationTimer7 = 3;
-            }
-          } else
-          if(AnimationTimer7 == 3) {
-            gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
-            gb.display.print(enText[15]);
-
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 4;
-            }
-          } else
-          if(AnimationTimer7 == 4) {
-            gb.display.drawImage(80-1-18, 1, ArrowDown_Push);
-            gb.display.print(enText[16]);
-
-            if(gb.buttons.released(BUTTON_DOWN) && PausedTimer == 0) {
-              AnimationTimer7 = 5;
-            }
-          } else
-          if(AnimationTimer7 == 5) {
-            gb.display.setCursor(1,64-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
-            gb.display.print(enText[17]);
-
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer6 = 3;
-              AnimationTimer7 = 0;
-            }
-          }
-        }
-        
-        if(AnimationTimer6 == 3) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
-
-          if(AnimationTimer7 == 0 && Div64(player.mainPlayer.x) > 17) {
-            AnimationTimer7 = 1;
-          }
-
-          if(AnimationTimer7 == 1) {
-            gb.display.print(enText[18]);
-            if(Div64(player.mainPlayer.x) > 22) {
-              AnimationTimer6 = 4;
-              AnimationTimer7 = 0;
-            }
-          }
-        }
-
-        if(AnimationTimer6 == 4) {
-          if(AnimationTimer7 == 0 && Div64(player.mainPlayer.x) > 24) {
-            AnimationTimer7 = 1;
-          }
-          
-          if(AnimationTimer7 == 1){
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[19]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 2;
-            }
-          } else
-          if(AnimationTimer7 == 2) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            //gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
-            gb.display.print(enText[20]);
-            /*if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
-              AnimationTimer6 = 5;
-              AnimationTimer7 = 0;
-            }*/
-          }
-        }
-
-        if(AnimationTimer6 == 5) {
-          if(AnimationTimer7 == 0) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.print(enText[21]);
-            if(Div64(player.mainPlayer.x) < 23) {
-              AnimationTimer7 = 1;
-            }
-          } else
-          if(AnimationTimer7 == 1) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.print(enText[22]);
-            if(Div64(player.mainPlayer.x) > 26) {
-              AnimationTimer7 = 2;
-            }
-          } else
-          if(AnimationTimer7 == 2) {
-            if(Div64(player.mainPlayer.x) > 42) {
-              salmonidManager.Spawn(Mul8(50), Mul8(3), 4, 1);
-              AnimationTimer7 = 3;
-            }
-          } else
-          if(AnimationTimer7 == 3) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[23]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 4;
-            }
-          } else
-          if(AnimationTimer7 == 4) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1-8, ArrowUp_Push);
-            gb.display.print(enText[24]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 5;
-            }
-          } else
-          if(AnimationTimer7 == 5) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.print(enText[25]);
-          } else
-          if(AnimationTimer7 == 6) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[26]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 7;
-            }
-          } else
-          if(AnimationTimer7 == 7) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[27]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 8;
-            }
-          } else
-          if(AnimationTimer7 == 8) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[28]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 9;
-            }
-          }  else
-          if(AnimationTimer7 == 9) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[29]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 10;
-            }
-          } else
-          if(AnimationTimer7 == 10) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[30]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 11;
-            }
-          } else
-          if(AnimationTimer7 == 11) {
-            if(Div64(player.mainPlayer.x) < 23) {
-              AnimationTimer7 = 12;
-            }
-          } else
-          if(AnimationTimer7 == 12) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[31]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              AnimationTimer7 = 13;
-            }
-          } else
-          if(AnimationTimer7 == 13) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
-            gb.display.print(enText[32]);
-            if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
-              MissionWriteIndex(0,0,1);
-              MissionUpload();
-              AnimationTimer = 0;
-              AnimationTimer2 = 0;
-              AnimationTimer3 = 0;
-              AnimationTimer4 = 0;
-              AnimationTimer5 = 0;
-              AnimationTimer6 = 0;
-              AnimationTimer7 = 0;
-              TutorialMode = false;
-              IsPlaying = false;
-              GameState = 1;
-            }
-          }
-        }
-      }
+      gb.display.setColor((ColorIndex)10);
+      gb.display.drawFastHLine(74,54,5);
+      gb.display.drawFastHLine(74,62,5);
       if(PausedTimer < 0) {
         gb.display.setColor((ColorIndex)3);
         gb.display.fillRect(0,0,80,VerticalClosing[abs(PausedTimer+1)]);

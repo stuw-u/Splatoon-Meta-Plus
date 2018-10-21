@@ -48,30 +48,16 @@ bool isOffScreenW(int16_t x, int16_t y, byte width, byte height) {
 // WORLD MANAGER
 /////////////////
 
-#define MaxMapW 75 //78
-#define MaxMapH 25 //32
-
-#define MapTileGroupW 15
-#define MapTileGroupH 5
+#define MaxMapW 30 //78
+#define MaxMapH 10 //32
 
 class World {
   public:
-  byte MapWidth = 75;
-  byte MapHeight = 25;
+  byte MapWidth = 30;
+  byte MapHeight = 10;
+  int32_t WaterWave = 0;
   
-  int16_t WaterLevel = 16;
-  uint32_t WaterWave = 0;
-  bool FlagSet = false;
-  int8_t FlagWave = 0;
-  byte FlagEggs = 0;
-  byte FlagGolden = 0;
   int16_t Anger = 0;
-
-  byte MaxEggs = 20;
-  byte MaxGolden = 5;
-
-  byte mapTileGroups[MapTileGroupW][MapTileGroupH+1]; //Last row meant to store themes
-  //B Theme Theme Theme Tile Tile Tile Tile Tile
   
   byte splashMemory[MaxMapW/2][MaxMapH];
   byte splashMemoryColor[(int)ceil(MaxMapW*MaxMapH/8)];
@@ -193,76 +179,24 @@ class World {
   }
 
   byte GetTile(int16_t x, int16_t y){
-    if(TutorialMode) {
-      return Tutorial[x+y*MapWidth];
-    }
-    
-    //2,1 -- 3,0 -- 3,1 Flip TileGround and tiles
-    
     if(x<0||y<0||x>=MaxMapW||y>=MaxMapH) {
       return 1;
     }
-    byte Theme = ThemeTileTypeGetTheme(mapTileGroups[x/5][y/5]);
-    byte TileGroup = ThemeTileTypeGetTileType(mapTileGroups[x/5][y/5]);
-    if(Theme == 0) {
-      return TileGroup;
-    } else if(Theme > 0) {
-      if(x/5 > (MapWidth/10)) {
-        bool DoIt = false;
-        if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 2) {
-          if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 26] == 1) {
-            DoIt = true;
-          }
-        }
-        if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 3) {
-          DoIt = true;
-        }
-
-        if(DoIt) {
-          return FlipTile(Themes[Theme-1][1+TileGroup * TilesGroupCount + ((4-(x%5)) + (y%5) * 5)]);
-        } else {
-          return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
-        }
-      } else {
-        return Themes[Theme-1][1+TileGroup * TilesGroupCount + ((x%5) + (y%5) * 5)];
-      }
-    }
+    return BossArena[x+y*MapWidth];
   }
 
   byte GetTileNoObstacle(int16_t x, int16_t y){
-    if(TutorialMode) {
-      return Tutorial[x+y*MapWidth];
-    }
-    
     if(x<0||y<0||x>=MaxMapW||y>=MaxMapH) {
       return 1;
     }
-    byte Theme = ThemeTileTypeGetTheme(mapTileGroups[x/5][y/5]);
-    byte TileGroup = ThemeTileTypeGetTileType(mapTileGroups[x/5][y/5]);
-    if(Theme == 0) {
-      return TileGroup;
-    } else if(Theme > 0) {
-      if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 0) {
-        return Themes[0][1];
-      } else if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 1) {
-        return Themes[0][1+0 * TilesGroupCount + ((x%5) + (y%5) * 5)];
-      } else {
-        return 0;
-      }
-    }
+    return BossArena[x+y*MapWidth];
   }
 
   uint16_t GetSpawnPositionX () {
-    if(TutorialMode) {
-      return Mul64(2)+32;
-    }
     return (MapWidth/2-2)*64+32;
   }
 
   uint16_t GetSpawnPositionY () {
-    if(TutorialMode) {
-      return 9*64;
-    }
     return (2*64);
   }
 
@@ -292,86 +226,12 @@ class World {
       yMin+=3;
       yMax-=4;
     }
-
-    if(!isOffScreen(MapWidth*4, 8, 23, 32) && !TutorialMode) {
-      if(FlagEggs >= MaxEggs && FlagGolden >= MaxGolden) {
-        Canon.setFrame(FlagWave);
-        if(WaterLevel%2==0) {
-          gb.display.drawImage(MapWidth*4 - cameraX, (8+18) - cameraY, Canon, 30, 14);
-        } else {
-          gb.display.drawImage(MapWidth*4-18 - cameraX, (8+18) - cameraY, Canon, -30, 14);
-        }
-      } else {
-        if(FlagGolden > 5) {
-          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        } else if(FlagGolden > 3) {
-          gb.display.drawImage((MapWidth*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        } else if(FlagGolden > 1) {
-          gb.display.drawImage((MapWidth*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        } else if(FlagGolden > 0) {
-          gb.display.drawImage((MapWidth*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        }
-        gb.display.drawImage(MapWidth*4 - cameraX, 8 - cameraY, Basket);
-      }
-    } else if(!isOffScreen(46*4, 8, 23, 32) && TutorialMode) {
-      if(FlagGolden > 5) {
-        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 14) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 3) {
-        gb.display.drawImage((46*4 + 6) - cameraX, (8 + 16) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 1) {
-        gb.display.drawImage((46*4 + 10) - cameraX, (8 + 22) - cameraY, Golden_Large);
-        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      } else if(FlagGolden > 0) {
-        gb.display.drawImage((46*4 + 5) - cameraX, (8 + 22) - cameraY, Golden_Large);
-      }
-      gb.display.drawImage(46*4 - cameraX, 8 - cameraY, Basket);
-    }
-    if(!isOffScreen((MapWidth/2*8 - 12), 10, 15, 24) && !TutorialMode) {
-      if(FlagSet && FlagWave >= 0) {
-        Flag.setFrame(1+FlagWave/2);
-        FlagWave++;
-        if(FlagWave > 3*2) {
-          FlagWave = 0;
-        }
-      } else {
-        if(FlagWave < 0) {
-          FlagWave++;
-        }
-        Flag.setFrame(0);
-      }
-      gb.display.drawImage((MapWidth/2*8 - 12) - cameraX, 10 - cameraY, Flag);
-    } else if(!isOffScreen((46/2*8 - 12), 10, 15, 24) && TutorialMode){
-      if(FlagSet && FlagWave >= 0) {
-        Flag.setFrame(1+FlagWave/2);
-        FlagWave++;
-        if(FlagWave > 3*2) {
-          FlagWave = 0;
-        }
-      } else {
-        if(FlagWave < 0) {
-          FlagWave++;
-        }
-        Flag.setFrame(0);
-      }
-      gb.display.drawImage((46/2*8 - 12) - cameraX, 10 - cameraY, Flag);
-    }
     
     for(int16_t y = yMin; y < yMax; y++) {
       for(int16_t x = xMin; x < xMax; x++ ) {
         byte gt = GetTile(x,y);
         byte gc = TilesParams_Array[gt*TileParamsCount+0];
-        if(gt == 0 || Mul8(y) >= MapHeight*8-(WaterLevel-8)) {
+        if(gt == 0) {
           continue;
         }
 
@@ -450,466 +310,12 @@ class World {
       }
     }
 
-    for(int16_t x = xMin; x < xMax; x++ ) {
-      int8_t c = cos(WaterWave)*2; //No lut? WHO CARES
-      if(toScreenY(MapHeight*8-(WaterLevel + c)) < LCDHEIGHT && toScreenY(MapHeight*8-(WaterLevel + c)) >= 0) {
-        gb.display.drawImage(toScreenX(Mul8(x)), toScreenY(MapHeight*8-(WaterLevel + c)), Water);
-        gb.display.setColor((ColorIndex)11);
-        gb.display.fillRect(toScreenX(Mul8(x)), toScreenY(MapHeight*8-(WaterLevel + c)) + 8, 8, LCDHEIGHT-(toScreenY(MapHeight*8-(WaterLevel + c)) + 8));
-      }
-      WaterWave++;
-      if(WaterWave % 520 == 0) {
-        if(!TutorialMode) {
-          WaterLevel++;
-        }
-      }
-    }
+    WaterWave++;
   }
-
-  
-  byte StuitableTile[8];
-  byte CFullfilled = 0;
-  byte Seed = 0;
   
   void Initialize (byte S) {
-    FlagSet = false;
-    FlagWave = 0;
-    MaxEggs = random(18,26);
-    MaxGolden = random(2,5);
-    FlagEggs = 0;
-    FlagGolden = 0;
-    WaterWave = 0;
-    WaterLevel = 16;
     Anger = 0;
     randomSeed(S);
-    Seed = S;
-
-    if(TutorialMode) {
-      MapWidth = 65;
-      MapHeight = 16;
-
-      MaxEggs = 3;
-      MaxGolden = 1;
-      return;
-    } else {
-      MapWidth = 75;
-      MapHeight = 25;
-    }
-    
-    byte Cut = random(3,MapTileGroupW-3);
-    byte ThemeA = random(0,5);
-    byte ThemeB = random(0,5);
-    if(ThemeB == ThemeA) {
-      ThemeB = ThemeA+2;
-      if(ThemeB>=5) {
-        ThemeB -= 5;
-      }
-    }
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      mapTileGroups[x][MapTileGroupH] = (ThemeA)*(x>Cut) + (ThemeB)*(x<=Cut);
-    }
-    int8_t h = 0;
-    bool MiddleAtMaxHeight = false;
-    bool EndAtMinHeight = false;
-    while(!(MiddleAtMaxHeight && EndAtMinHeight)) {
-      h = 0;
-      MiddleAtMaxHeight = false;
-      EndAtMinHeight = false;
-      for(int8_t x = 0; x < MapTileGroupW; x++) {
-        int8_t rand0 = random(0,5);
-        int8_t rand1 = random(-1,2);
-        for(int8_t y = 0; y < MapTileGroupH; y++) {
-          /*(x*1.0F/MapTileGroupW)+(y*1.0F/MapTileGroupH) < 1.0F && y != MapTileGroupH-1*/
-          mapTileGroups[x][y] = ThemeTileTypeMerge(0,y >= MapTileGroupH-1-h);
-        }
-        if(rand0>2 && x+1!=MapTileGroupW) {
-          h = constrain(h+constrain(rand1,-1,1),0,MapTileGroupH-2);
-        }
-        if(x==MapTileGroupW/2-1) {
-          if(h == MapTileGroupH-2) {
-            MiddleAtMaxHeight = true;
-          }
-        }
-        if(x==MapTileGroupW-1) {
-          if(h == 0) {
-            EndAtMinHeight = true;
-          }
-        }
-      }
-    }
-
-    //Phase two!!
-    //Theme 0 codes: 0-Air 1-Ground 2-Stair 4-Partial, 5-Full, 7-Deco, 8-Underground
-
-
-    //Basic p. platform, stair setup
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        //Current Block is Available
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0) {
-          if(y+1<MapTileGroupH) {
-            if(ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-              //Bellow is ground
-              if(x-1>=0) {
-                if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) == 1) {
-                  mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
-                  if(x+1<MapTileGroupW) {
-                    if(ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) == 1) {
-                      mapTileGroups[x][y] = ThemeTileTypeMerge(0,4);
-                    }
-                  }
-                }
-              }
-              if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0) {
-                if(x+1<MapTileGroupW) {
-                  if(ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) == 1) {
-                    mapTileGroups[x][y] = ThemeTileTypeMerge(0,2);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    //Full Support
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        //Current Block is Available
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x+1<MapTileGroupW && x-1>=0 && y+1<MapTileGroupH) {
-          //Blocks on both sids aren't ground and the one bellow is
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-            byte rand4 = random(0,4);
-            if(rand4 == 0) {
-              //Set as full platform
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,5);
-            }
-          }
-        } else
-        //Current Block is Ground
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 1 && x+1<MapTileGroupW && x-1>=0 && y+1<MapTileGroupH) {
-          //Blocks on both sids aren't ground and the one bellow is
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1) {
-            byte rand4 = random(0,5);
-            if(rand4 == 3) {
-              //Set as full platform
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,5);
-            }
-          }
-        } else
-        //Current Block is Ground
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 1 && y+1>=MapTileGroupH) {
-          //Block above is not ground and the one bellow is out of range
-          if(ThemeTileTypeGetTileType(mapTileGroups[x][y-1]) != 1) {
-            //Set as full platform
-            mapTileGroups[x][y] = ThemeTileTypeMerge(0,5);
-          }
-        }
-      }
-    }
-
-    //Full platform stacking
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x+1<MapTileGroupW && x-1>=0 && y+1<MapTileGroupH) {
-          //Blocks on both sids aren't ground and the one bellow is F. Platform
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 5) {
-            byte rand4 = random(0,4);
-            if(rand4 == 0) {
-              //Set as full platform
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,5);
-            } else if(rand4 == 1) {
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,4);
-            }
-          }
-        }
-      }
-    }
-
-    //Deco
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        //Current Block is Available
-        if(ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 0 && x+1<MapTileGroupW && x-1>=0 && y+1<MapTileGroupH) {
-          //Blocks on both sids aren't ground and the one bellow is Ground or Full platform
-          if(ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 1 && 
-          (ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 1 || ThemeTileTypeGetTileType(mapTileGroups[x][y+1]) == 5)) {
-            byte rand5 = random(0,3);
-            if(rand5 == 0) {
-              //Set as deco
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,7);
-            }
-          }
-        }
-      }
-    }
-
-    mapTileGroups[MapTileGroupW/2][0] = 0;
-
-    //Ground no underground
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 1) {
-          
-          bool AL;
-          bool AR;
-          bool AU;
-          if(y-1>=0) {
-            if(ThemeTileTypeGetTheme(mapTileGroups[x][y-1]) == 0) {
-              AU = (ThemeTileTypeGetTileType(mapTileGroups[x][y-1]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x][y-1]) != 8);
-            } else {
-              AU = (Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y-1])*TilesGroupCount+25] != 0);
-            }
-          }
-          if(x-1>=0) {
-            if(ThemeTileTypeGetTheme(mapTileGroups[x-1][y]) == 0) {
-              AL = (ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x-1][y]) != 8);
-            } else {
-              AL = (Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x-1][y])*TilesGroupCount+25] != 0);
-            }
-          }
-          if(x+1<MapTileGroupW) {
-            if(ThemeTileTypeGetTheme(mapTileGroups[x+1][y]) == 0) {
-              AR = (ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 1 && ThemeTileTypeGetTileType(mapTileGroups[x+1][y]) != 8);
-            } else {
-              AR = (Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x+1][y])*TilesGroupCount+25] != 0);
-            }
-          }
-
-          if(!AU) {
-            //Underground Check
-            mapTileGroups[x][y] = ThemeTileTypeMerge(0,8);
-          } else {
-            if(!AL && !AR) {
-              //Normal Ground
-              CFullfilled = 0;
-              for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 0) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 1) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 8 && random(0,5) == 0) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 9 && random(0,5) == 0) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-              }
-              if(CFullfilled > 0) {
-                mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-              }
-            } else if(AL && AR) {
-              //Two Side Ground
-              CFullfilled = 0;
-              for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 2) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 3) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-              }
-              if(CFullfilled > 0) {
-                mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-              }
-            } else if(AL && !AR) {
-              //LeftSide Ground
-              CFullfilled = 0;
-              for(byte i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 4) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 5) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-              }
-              if(CFullfilled > 0) {
-                mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-              }
-            } else if(!AL && AR) {
-              //RightSide Ground
-              CFullfilled = 0;
-              for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 6) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 7) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-              }
-              if(CFullfilled > 0) {
-                mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    //Stairs and partials and deco
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 2) {
-          CFullfilled = 0;
-          for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 2) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 1) {
-                StuitableTile[CFullfilled] = i;
-                CFullfilled++;
-              }
-            }
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 3) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 0) {
-                StuitableTile[CFullfilled] = i;
-                CFullfilled++;
-              }
-            }
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 3) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 1) {
-                if(ThemeTileTypeGetTheme(mapTileGroups[x][y+1]) != 0 && Themes[0][1+ThemeTileTypeGetTileType(mapTileGroups[x][y+1])*TilesGroupCount+25] == 0) {
-                  StuitableTile[CFullfilled] = i;
-                  CFullfilled++;
-                }
-              }
-            }
-          }
-          if(CFullfilled > 0) {
-            mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-          }
-        }
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 4) {
-          CFullfilled = 0;
-          for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 2) {
-              StuitableTile[CFullfilled] = i;
-              CFullfilled++;
-            }
-          }
-          if(CFullfilled > 0) {
-            mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-          }
-        }
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 7) {
-          mapTileGroups[x][y] = ThemeTileTypeMerge(1,0);
-          if(ThemeTileTypeGetTheme(mapTileGroups[x][y+1]) != 0) {
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y+1])*TilesGroupCount+25] == 0) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y+1])*TilesGroupCount+26] != 8 && Themes[0][1+ThemeTileTypeGetTileType(mapTileGroups[x][y+1])*TilesGroupCount+26] != 9) {
-                CFullfilled = 0;
-                for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 4) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-                if(CFullfilled > 0) {
-                  mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-                }
-              }
-            }
-          } else {
-            CFullfilled = 0;
-            for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 4) {
-                StuitableTile[CFullfilled] = i;
-                CFullfilled++;
-              }
-            }
-            if(CFullfilled > 0) {
-              mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-            }
-          }
-        }
-      }
-    }
-
-    //Full platform
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 5) {
-          CFullfilled = 0;
-          for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-            if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 1) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 0) {
-                StuitableTile[CFullfilled] = i;
-                CFullfilled++;
-              }
-            }
-          }
-          if(CFullfilled > 0) {
-            mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-          }
-        }
-      }
-    }
-
-    //Underground and dip checks
-    for(int8_t x = 0; x < MapTileGroupW; x++) {
-      for(int8_t y = 0; y < MapTileGroupH; y++) {
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) == 0 && ThemeTileTypeGetTileType(mapTileGroups[x][y]) == 8) {
-          if(ThemeTileTypeGetTheme(mapTileGroups[x][y-1]) != 0 && Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y-1])*TilesGroupCount+25] == 0) {
-            if((Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y-1])*TilesGroupCount+26])%2==1) {
-              CFullfilled = 0;
-              for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                  if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 10) {
-                    StuitableTile[CFullfilled] = i;
-                    CFullfilled++;
-                  }
-                }
-              }
-              if(CFullfilled > 0) {
-                mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-              }
-            } else {
-              mapTileGroups[x][y] = ThemeTileTypeMerge(0,1);
-            }
-          } else {
-            mapTileGroups[x][y] = ThemeTileTypeMerge(0,1);
-          }
-        }
-        if(ThemeTileTypeGetTheme(mapTileGroups[x][y]) != 0 && Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y])*TilesGroupCount+25] == 0 &&
-        (Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y])*TilesGroupCount+26] == 8 || Themes[0][1+ThemeTileTypeGetTileType(mapTileGroups[x][y])*TilesGroupCount+26] == 9)) {
-          if(ThemeTileTypeGetTheme(mapTileGroups[x][y-1]) == 0 || (ThemeTileTypeGetTheme(mapTileGroups[x][y-1]) != 0 &&
-          (Themes[mapTileGroups[x][MapTileGroupH]][1+ThemeTileTypeGetTileType(mapTileGroups[x][y])*TilesGroupCount+25] == 3 && (Themes[0][1+ThemeTileTypeGetTileType(mapTileGroups[x][y])*TilesGroupCount+26] == 0)))) {
-            continue;
-          } else {
-            CFullfilled = 0;
-            for(uint16_t i = 0; i < Themes[mapTileGroups[x][MapTileGroupH]][0]; i++) {
-              if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+25] == 0) {
-                if(Themes[mapTileGroups[x][MapTileGroupH]][1+i*TilesGroupCount+26] == 0) {
-                  StuitableTile[CFullfilled] = i;
-                  CFullfilled++;
-                }
-              }
-            }
-            if(CFullfilled > 0) {
-              mapTileGroups[x][y] = ThemeTileTypeMerge(mapTileGroups[x][MapTileGroupH]+1,StuitableTile[random(0,CFullfilled)]);
-            }
-          }
-        }
-      }
-    }
   }
   
   void Update (uint8_t RenderMode) {

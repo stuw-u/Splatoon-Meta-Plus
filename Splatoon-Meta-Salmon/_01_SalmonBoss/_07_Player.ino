@@ -803,37 +803,10 @@ class Player :
         }
       }
     }
-
-    void EggCollision () {
-      for(byte i = 0; i < MaxEgg; i++) {
-        if(eggManager.eggs[i].alive) {
-          if(gb.collidePointRect(Div8(eggManager.eggs[i].x),Div8(eggManager.eggs[i].y)-3,Div8(x)-getWidth()/2,Div8(y)-getHeight()/2,getWidth()*2,getHeight()*2)) {
-            if(eggManager.eggs[i].type == 0) {
-              eggManager.eggs[i].collected = true;
-            } else if(eggManager.eggs[i].type == 1) {
-              if(!HasGoldenEgg) {
-                playSFX(7,2);
-                HasGoldenEgg = true;
-                eggManager.eggs[i].alive = false;
-              }
-            }
-          }
-
-          if(eggManager.eggs[i].collected) {
-            eggManager.eggs[i].vx += -((x+i*8)-eggManager.eggs[i].x)/5;
-            eggManager.eggs[i].vy += -((y+i*8)-eggManager.eggs[i].y)/5;
-          }
-        }
-      }
-    }
     
     void Update () {
       if(Live < 0) {
-        if(TutorialMode) {
-          Live = 1;
-        } else {
-          Die();
-        }
+        Die();
       } else if(RespawnTimer > 0) {
         RespawnTimer--;
         if(RespawnTimer == 0) {
@@ -849,7 +822,6 @@ class Player :
       BlinkingUpdate();
       Draw();
       BulletCollision();
-      EggCollision();
 
       if(EBottomInk) {
         Live = constrain(Live, -1, 80);
@@ -867,19 +839,32 @@ class Player :
     void Die () {
       particleManager.spawnParticle(x/8,y/8,4,colorGroup,PlayerColor);
       particleManager.spawnParticle(x/8+5,y/8+11,3,colorGroup,!PlayerColor);
-      for(byte i = 0; i < MaxEgg; i++) {
-        if(eggManager.eggs[i].alive && eggManager.eggs[i].type == 0) {
-          eggManager.eggs[i].Kill();
-        }
-      }
       
-      RespawnTimer = 80;
       Live = 100;
       vx = 0;
       vy = 0;
       IsSwiming = false;
       Refill = 100;
       HasGoldenEgg = false;
+
+      IsPlaying = true;
+      GameState = 0;
+      difficulty = 0;
+      difficultyB = 0;
+      AnimationTimer = 0;
+      AnimationTimer2 = 0;
+      AnimationTimer3 = 0;
+      AnimationTimer4 = 0;
+      AnimationTimer5 = 0;
+      AnimationTimer6 = 0;
+      AnimationTimer7 = 0;
+      AnimationTimer8 = 0;
+      PrepareMap();
+      
+      RespawnTimer = 40;
+      IsPaused = true;
+      PausedTimer = 0;
+      return;
     }
 };
 
@@ -902,32 +887,6 @@ class PlayersOperator {
   }
 
   void UpdateGlobal () {
-    if(Div64(mainPlayer.x) == 36 && !world.FlagSet && !TutorialMode) {
-      playSFX(7,0);
-      world.FlagSet = true;
-      world.FlagWave = -5;
-      particleManager.spawnParticle(world.MapWidth*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
-    }
-    if(Div64(mainPlayer.x) == 22 && !world.FlagSet && TutorialMode) {
-      playSFX(7,0);
-      world.FlagSet = true;
-      world.FlagWave = -5;
-      particleManager.spawnParticle(45*4+3-17, 13, 7, colorGroup, mainPlayer.PlayerColor);
-    }
-    if(Div64(mainPlayer.x) == 37 && mainPlayer.HasGoldenEgg && !TutorialMode) {
-      playSFX(2,1);
-      mainPlayer.HasGoldenEgg = false;
-      world.FlagGolden++;
-    }
-    if(Div64(mainPlayer.x) == 23 && mainPlayer.HasGoldenEgg && TutorialMode) {
-      playSFX(2,1);
-      mainPlayer.HasGoldenEgg = false;
-      world.FlagGolden++;
-    }
-    if(Div8(mainPlayer.y)+8 >= world.MapHeight*8-(world.WaterLevel) && mainPlayer.RespawnTimer <= 0) {
-      mainPlayer.Live -= 5;
-      mainPlayer.vy += 15;
-    }
     mainPlayer.Update();
   }
 

@@ -28,13 +28,20 @@ class Bullets:
       return 0;
     };
     virtual int16_t getXBounce() {
-      return 90;
+      return 900;
     };
     virtual int16_t getYBounce() {
+      if(Type == 6) {
+        return 70;
+      }
       return 10;
     };
     virtual byte getCollisionQuality() {
-      return 1;
+      if(Type != 6) {
+        return 1;
+      } else {
+        return 0;
+      }
     };
 
     void Draw () {
@@ -67,9 +74,15 @@ class Bullets:
           gb.display.drawImage(toScreenX(Div8(x)-2), toScreenY(Div8(y)-12), Missile);
         } else if(Type == 5) { //Ennemy Track Missile (Green only)
           gb.display.colorIndex = palette;
-          gb.display.colorIndex = palette;
           TrackMissile.setFrame((Timer/3)%2);
           gb.display.drawImage(toScreenX(Div8(x)-2), toScreenY(Div8(y)-2), TrackMissile);
+        } else if(Type == 6) { //Ennemy Bubble
+          gb.display.colorIndex = palette;
+          if(Timer < BulletTimeLimit/2) {
+            gb.display.drawImage(toScreenX(Div8(x)-3), toScreenY(Div8(y)-9), Bubblets_Big);
+          } else {
+            gb.display.drawImage(toScreenX(Div8(x)-3), toScreenY(Div8(y)-5), Bubblets_Smol);
+          }
         }
         gb.display.colorIndex = palette;
       }
@@ -90,16 +103,27 @@ class Bullets:
         Timer++;
         return;
       }
-      if(Timer < BulletTimeLimit && !IsDead && (Div8(y) < world.MapHeight*8-(world.WaterLevel))) {
+      if(Timer < BulletTimeLimit && !IsDead) {
         Timer++;
       } else {
-        if((Div8(y) >= world.MapHeight*8-(world.WaterLevel)) && !IsDead) {
-          particleManager.spawnParticle(Div8(x),Div8(y)-1,1,colorGroup,color);
-        }
         Die();
       }
+
+      if(Type == 6 && !IsDead) {
+        if(IsGroundedLeft) {
+          vx = -90;
+        }
+        if(IsGroundedRight) {
+          vx = 90;
+        }
+        if(vx > 0) {
+          vx = 90;
+        } else {
+          vx = -90;
+        }
+      }
       
-      if(collided && !IsDead) {
+      if(collided && !IsDead && (Type != 6)) {
         if(!isOffScreen())
           playSFX(1,1);
           
