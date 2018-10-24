@@ -839,6 +839,8 @@ class Player :
         if(RespawnTimer == 0) {
           x = world.GetSpawnPositionX();
           y = world.GetSpawnPositionY();
+          vx = 0;
+          vy = 0;
         }
         return;
       }

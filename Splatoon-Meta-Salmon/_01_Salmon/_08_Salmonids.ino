@@ -844,8 +844,9 @@ class Salmonid:
   #define HealtbarDistance 3
 
   void Draw () {
-    if((!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT) && type != 8))
+    if((!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT) && type != 8)) {
       return;
+    }
 
     float Squash = 1.0F + constrain(vy/8, -3, 3)/30.0F+((bob)/55.0F);
 
@@ -1002,8 +1003,10 @@ class Salmonid:
   }
 
   void OverDraw () {
-    if(!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT))
+    if(!(toScreenX(Div8(x)+ getWidth()) >= 0 && toScreenX(Div8(x)) < LCDWIDTH && toScreenY(Div8(y)) >= 0 && toScreenY(Div8(y)-getSHeight()) < LCDHEIGHT)) {
+      gb.display.drawImage(constrain(toScreenX(Div8(x) + getWidth()/2),2,LCDWIDTH-5-2), constrain(toScreenY(Div8(y) - getSHeight()/2),2,LCDHEIGHT-7-2), BossWarning);
       return;
+    }
 
     float Squash = 1.0F + constrain(vy/8, -3, 3)/30.0F;
 
@@ -1079,9 +1082,9 @@ class SalmonidManager {
     byte r2 = random(0,190);
     if((cooldown == 0 || (activeSalmons <= 1 && cooldown < 50)) && ((abs(Div64(player.mainPlayer.x) - zonePositionA) < 11) || r1==1)) {
       //zonePosition
-      if(Div8(world.WaterLevel) < 5) {
+      if(Div8(world.WaterLevel) > 5) {
         for(int8_t x = 0; x < world.MapWidth/2; x++) {
-          if(TilesParams_Array[TileParamsCount*world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) + 1] == 0) {
+          if(TilesParams_Array[TileParamsCount*world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) + 0] == 0) {
             zonePositionA = x;
           } else {
             break;
@@ -1093,7 +1096,7 @@ class SalmonidManager {
       SpawnBatchAt(0, 1);
     } else if((cooldown == 0 || (activeSalmons == 1 && cooldown < 50)) && ((abs(Div64(player.mainPlayer.x) - zonePositionB) < 11) || r2==1)) {
       //zonePosition
-      if(Div8(world.WaterLevel) < 5) {
+      if(Div8(world.WaterLevel) > 5) {
         for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
           if(TilesParams_Array[TileParamsCount*world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) + 0] == 0) {
             zonePositionB = x;
@@ -1109,7 +1112,7 @@ class SalmonidManager {
       if(cooldown == 0) {
         cooldown = ((6-difficulty)*15)+85 + random(0, 20);
 
-        if(Div8(world.WaterLevel) < 5) {
+        if(Div8(world.WaterLevel) > 5) {
           for(int8_t x = 0; x < world.MapWidth/2; x++) {
             if(TilesParams_Array[TileParamsCount*world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) + 0] == 0) {
               zonePositionA = x;
@@ -1119,7 +1122,7 @@ class SalmonidManager {
           }
         }
 
-        if(Div8(world.WaterLevel) < 5) {
+        if(Div8(world.WaterLevel) > 5) {
           for(int8_t x = world.MapWidth-1; x >= world.MapWidth/2; x--) {
             if(TilesParams_Array[TileParamsCount*world.GetTile(x,Div8(world.MapHeight*8-world.WaterLevel)) + 0] == 0) {
               zonePositionB = x;

@@ -1194,6 +1194,16 @@ void loop () {
 
     particleManager.Update();
 
+    zoneM1 = (zoneM1*9+salmonidManager.zonePositionA*8)/10;
+    zoneM2 = (zoneM2*9+salmonidManager.zonePositionB*8)/10;
+    if(!isOffScreen(zoneM1,(world.MapHeight*8-(world.WaterLevel))-12,11,16) && world.WaterLevel>40) {
+      gb.display.drawImage(toScreenX(zoneM1),toScreenY(world.MapHeight*8-(world.WaterLevel)-20),SpawnLights);
+    }
+
+    if(!isOffScreen(zoneM2,(world.MapHeight*8-(world.WaterLevel))-12,11,16) && world.WaterLevel>40) {
+      gb.display.drawImage(toScreenX(zoneM2),toScreenY(world.MapHeight*8-(world.WaterLevel)-20),SpawnLights);
+    }
+
     if(PausedTimer == 0) {
       if((Weapons[mainWeapon][0]) == 2 && gb.buttons.repeat(BUTTON_A,0)) {
         cameraX = (cameraX*5+(Div8(player.mainPlayer.x)+4-(LCDWIDTH/2) + ((curX-LCDWIDTH/2)/6)*10 + (-player.mainPlayer.vx/5)))/6;

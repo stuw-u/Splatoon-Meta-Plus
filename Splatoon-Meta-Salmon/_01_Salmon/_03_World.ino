@@ -914,6 +914,11 @@ class World {
   
   void Update (uint8_t RenderMode) {
     Draw(RenderMode);
+    if((int32_t)FlagEggs-MaxEggs >= 10) {
+      FlagEggs-=10;
+      FlagGolden++;
+      playSFX(7,2);
+    }
   }
 };
 
