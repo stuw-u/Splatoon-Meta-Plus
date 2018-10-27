@@ -14,6 +14,7 @@ class Salmonid:
   int8_t dir = 1;
   bool alive = false;
   bool hasSpawned = false;
+  bool dFlag = false;
   
   int8_t bobbing = 0;
   int8_t bob = 0;
@@ -338,6 +339,10 @@ class Salmonid:
   }
 
   void Update () {
+    if(dFlag) {
+      gb.display.colorIndex = paletteAllWhite;
+    }
+    
     bob += bobbing/3;
     bobbing *= 8;
     bobbing /= 10;
@@ -833,10 +838,14 @@ class Salmonid:
       Draw();
     }
 
-
-    if((Live < 0 && type != 9) || (BLive == 0 && type == 9)) {
-      particleManager.spawnParticle(Div8(x),Div8(y),7,colorGroup,1);
+    if(dFlag) {
+      gb.display.colorIndex = palette;
+      particleManager.spawnParticle(Div8(x) + getWidth()/2,Div8(y) + getSHeight()/2,7,colorGroup,1);
       Kill(true);
+      dFlag = false;
+    }
+    if((Live < 0 && type != 9) || (BLive == 0 && type == 9)) {
+      dFlag = true;
     }
   }
 
@@ -1232,6 +1241,7 @@ class SalmonidManager {
         salmonids[i].hasSpawned = false;
         salmonids[i].bobbing = 0;
         salmonids[i].bob = 0;
+        salmonids[i].dFlag = false;
         return;
       }
     }

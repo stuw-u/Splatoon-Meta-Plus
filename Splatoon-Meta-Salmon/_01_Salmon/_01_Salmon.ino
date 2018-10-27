@@ -131,6 +131,25 @@ byte V6 = 0;
 byte V7 = 0;
 byte cC = 0;
 
+Color paletteAllWhite[] = {  
+  (Color)0xf779, //(Color)0xf779 White
+  (Color)0xf779, //(Color)0xacd0 Grey
+  (Color)0xf779, //(Color)0x730b Dark Grey
+  (Color)0xacd0, //(Color)0x2923 Black
+  (Color)0xf779, //(Color)0xb15a Purple
+  (Color)0xf779, //(Color)0xc9ae Magenta
+  (Color)0xf779, //(Color)0xe985 Red
+  (Color)0xf779, //(Color)0xfc03 Orange
+  (Color)0xf779, //(Color)0xf5a2 Yellow
+  (Color)0xf779, //(Color)0x8624 Green
+  (Color)0xf779, //(Color)0x34a4 Dark Green
+  (Color)0xf779, //(Color)0x3291 Dark Blue
+  (Color)0xf779, //(Color)0x3415 Blue
+  (Color)0xf779, //(Color)0x461b Light Blue
+  (Color)0xf779, //(Color)0xf62f Beige (Light Skin)
+  (Color)0xf779  //(Color)0xcc47 Brown (Dark Skin)
+};
+
 Color paletteFlipBlackGrey[] = {  
   (Color)0xf779, //(Color)0xf779 White
   (Color)0x2923, //(Color)0xacd0 Grey
