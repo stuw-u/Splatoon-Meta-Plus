@@ -57,7 +57,7 @@ class Salmonid:
     } else if(type == 2) {
       return 11;
     } else if(type == 3) {
-      return 31;
+      return 24;
     } else if(type == 4) {
       if(cooldown < 19) {
         return 23;
@@ -91,7 +91,7 @@ class Salmonid:
     } else if(type == 2) {
       return 13;
     } else if(type == 3) {
-      return 29;
+      return 28;
     } else if(type == 4) {
       if(cooldown < 19) {
         return 23;
@@ -339,6 +339,12 @@ class Salmonid:
   }
 
   void Update () {
+    if(y <= 0 && (type < 12 || type > 15)) {
+      Kill(false);
+    }
+    if(y/8/8 > world.MapHeight && (type < 12 || type > 15)) {
+      Kill(false);
+    }
     if(dFlag) {
       gb.display.colorIndex = paletteAllWhite;
     }
@@ -554,8 +560,8 @@ class Salmonid:
           cooldown--;
         }
       }
-      bool PushRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/3)+0 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/4)) < getSHeight()/2+1;
-      bool AttackRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)+getSHeight()/4)) < getSHeight()/2+4;
+      bool PushRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/3)+0 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)-getSHeight()/2)) < getSHeight()/2+1;
+      bool AttackRange = abs((Div8(player.mainPlayer.x)+player.mainPlayer.getWidth()/2) - (Div8(x)+getWidth()/2)) < (getWidth()/2)+4 && abs((Div8(player.mainPlayer.y)+player.mainPlayer.getHeight()/2) - (Div8(y)-getSHeight()/2)) < getSHeight()/2+4;
       bool InWater = Div8(y)-(getSHeight()/2) >= world.MapHeight*8-(world.WaterLevel);
       if(type == 3 && AttackRange || cooldown < 20) {
         if(cooldown > 0) {
@@ -860,11 +866,14 @@ class Salmonid:
     float Squash = 1.0F + constrain(vy/8, -3, 3)/30.0F+((bob)/55.0F);
 
     if(type == 0) {
-      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-11*Squash), SpoonSalmonid, 11 * -dir, 11*Squash);
+      //SpoonSalmonid.setFrame(world.WaterWave/3%2);
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-11*Squash), SpoonSalmonid, 10 * -dir, 11*Squash);
     } else if(type == 1) {
-      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-16*Squash), NormalSalmonid, 19 * -dir, 16*Squash);
+      //NormalSalmonid.setFrame(world.WaterWave/3%4);
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-19*Squash), NormalSalmonid, 17 * -dir, 19*Squash);
     } else if(type == 3) {
-      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-31*Squash), FatSalmonid, 32 * -dir, 31*Squash);
+      //FatSalmonid.setFrame(world.WaterWave/3%4);
+      gb.display.drawImage(toScreenX(Div8(x)), toScreenY(Div8(y)-28*Squash), FatSalmonid, 24 * -dir, 28*Squash);
       if(cooldown == 0) {
         FryingPan.setFrame(0);
       } else if(cooldown == 1) {
@@ -877,9 +886,9 @@ class Salmonid:
         FryingPan.setFrame(0);
       }
       if(dir == -1) {
-        gb.display.drawImage(toScreenX(Div8(x)-6), toScreenY(Div8(y)-31*Squash+18), FryingPan, 18, 9);
+        gb.display.drawImage(toScreenX(Div8(x)-12), toScreenY(Div8(y)-31*Squash+18), FryingPan, 18, 9);
       } else {
-        gb.display.drawImage(toScreenX(Div8(x)+32+6-18), toScreenY(Div8(y)-31*Squash+18), FryingPan, -18, 9);
+        gb.display.drawImage(toScreenX(Div8(x)+24+12-18), toScreenY(Div8(y)-31*Squash+18), FryingPan, -18, 9);
       }
     } else if(type == 4) {
       if(cooldown >= 46) {

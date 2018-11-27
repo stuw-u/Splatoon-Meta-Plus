@@ -107,6 +107,8 @@ bool PartialRendering = false;
 byte Missions = 0;
 byte MissionsB = 0;
 
+bool slmKnock = false;
+
 byte hitAnim = 0;
 
 bool IsPaused = false;

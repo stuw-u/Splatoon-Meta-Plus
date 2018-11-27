@@ -1,4 +1,4 @@
-// MAIN STUFF
+  // MAIN STUFF
 ////////////////
 
 bool WeaponRecharged = false;
@@ -136,6 +136,11 @@ void DrawCursor() {
     if(gb.buttons.repeat(BUTTON_DOWN,0)) {
       curY+=4;
       curY = constrain(curY, 0+5, LCDHEIGHT-4);
+    }
+    if(cameraX + curX > player.mainPlayer.x/8) {
+        player.mainPlayer.PlayerDir = 1;
+    } else {
+        player.mainPlayer.PlayerDir = -1;
     }
 
     if(IsPlaying) {
@@ -1175,6 +1180,20 @@ void loop () {
       gb.display.setColor((ColorIndex)12);
       gb.display.fill();
     }
+
+    if(slmKnock) {
+      slmKnock = false;
+      for(int i = 0; i < SalmonidCount; i++) {
+        if(salmonidManager.salmonids[i].alive) {
+          salmonidManager.salmonids[i].vy = 120;
+          if((salmonidManager.salmonids[i].x / 8 + salmonidManager.salmonids[i].getWidth()/2) < (player.mainPlayer.x / 8)) {
+            salmonidManager.salmonids[i].vx = 320;
+          } else {
+            salmonidManager.salmonids[i].vx = -320;
+          }
+        }
+      }
+    }
     
     player.UpdateGlobal();
     salmonidManager.UpdateGlobal();
@@ -1197,11 +1216,11 @@ void loop () {
     zoneM1 = (zoneM1*9+salmonidManager.zonePositionA*8)/10;
     zoneM2 = (zoneM2*9+salmonidManager.zonePositionB*8)/10;
     if(!isOffScreen(zoneM1,(world.MapHeight*8-(world.WaterLevel))-12,11,16) && world.WaterLevel>40) {
-      gb.display.drawImage(toScreenX(zoneM1),toScreenY(world.MapHeight*8-(world.WaterLevel)-20),SpawnLights);
+      gb.display.drawImage(toScreenX(zoneM1),toScreenY(world.MapHeight*8-(world.WaterLevel)-12),SpawnLights);
     }
 
     if(!isOffScreen(zoneM2,(world.MapHeight*8-(world.WaterLevel))-12,11,16) && world.WaterLevel>40) {
-      gb.display.drawImage(toScreenX(zoneM2),toScreenY(world.MapHeight*8-(world.WaterLevel)-20),SpawnLights);
+      gb.display.drawImage(toScreenX(zoneM2),toScreenY(world.MapHeight*8-(world.WaterLevel)-12),SpawnLights);
     }
 
     if(PausedTimer == 0) {
@@ -1363,7 +1382,7 @@ void loop () {
       if(TutorialMode) {
         gb.display.setColor((ColorIndex)0, (ColorIndex)3);
         if(AnimationTimer6 == 0) {
-          gb.display.setCursor(1,64-1-6-1-6);
+          gb.display.setCursor(1, 64 - 6 - 6);
           if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
             AnimationTimer7 = 1;
           }
@@ -1377,7 +1396,7 @@ void loop () {
         }
         
         if(AnimationTimer6 == 1) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
+          gb.display.setCursor(1, 64 - 6 - 6 - 6);
           gb.display.drawImage(80-1-18, 1, A_Push);
           gb.display.print(enText[12]);
           if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
@@ -1387,7 +1406,7 @@ void loop () {
         }
         
         if(AnimationTimer6 == 2) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
+          gb.display.setCursor(1, 64 - 6 - 6 - 6);
           if(AnimationTimer7 == 0 && Div64(player.mainPlayer.x) > 11) {
             AnimationTimer7 = 1;
           }
@@ -1401,6 +1420,7 @@ void loop () {
           } else
           if(AnimationTimer7 == 2) {
             gb.display.drawImage(80-1-18, 1, A_Push);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.print(enText[14]);
 
             if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
@@ -1409,6 +1429,7 @@ void loop () {
           } else
           if(AnimationTimer7 == 3) {
             gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.print(enText[15]);
 
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1424,7 +1445,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 5) {
-            gb.display.setCursor(1,64-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
             gb.display.print(enText[17]);
 
@@ -1436,7 +1457,7 @@ void loop () {
         }
         
         if(AnimationTimer6 == 3) {
-          gb.display.setCursor(1,64-1-6-1-6-1-6);
+          gb.display.setCursor(1, 64 - 6 - 6 - 6);
 
           if(AnimationTimer7 == 0 && Div64(player.mainPlayer.x) > 17) {
             AnimationTimer7 = 1;
@@ -1457,7 +1478,7 @@ void loop () {
           }
           
           if(AnimationTimer7 == 1){
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[19]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1465,7 +1486,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 2) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             //gb.display.drawImage(80-1-18, 1, ArrowUp_Push);
             gb.display.print(enText[20]);
             /*if(gb.buttons.released(BUTTON_A) && PausedTimer == 0) {
@@ -1477,14 +1498,14 @@ void loop () {
 
         if(AnimationTimer6 == 5) {
           if(AnimationTimer7 == 0) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.print(enText[21]);
             if(Div64(player.mainPlayer.x) < 23) {
               AnimationTimer7 = 1;
             }
           } else
           if(AnimationTimer7 == 1) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.print(enText[22]);
             if(Div64(player.mainPlayer.x) > 26) {
               AnimationTimer7 = 2;
@@ -1497,7 +1518,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 3) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[23]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1505,19 +1526,19 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 4) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
-            gb.display.drawImage(80-1-18, 1-8, ArrowUp_Push);
+            gb.display.setCursor(1, 64 - 6 - 6);
+            gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[24]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
               AnimationTimer7 = 5;
             }
           } else
           if(AnimationTimer7 == 5) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.print(enText[25]);
           } else
           if(AnimationTimer7 == 6) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[26]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1525,7 +1546,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 7) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[27]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1533,7 +1554,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 8) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[28]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1541,7 +1562,7 @@ void loop () {
             }
           }  else
           if(AnimationTimer7 == 9) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[29]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1549,7 +1570,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 10) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[30]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1562,7 +1583,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 12) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[31]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {
@@ -1570,7 +1591,7 @@ void loop () {
             }
           } else
           if(AnimationTimer7 == 13) {
-            gb.display.setCursor(1,64-1-6-1-6-1-6);
+            gb.display.setCursor(1, 64 - 6 - 6);
             gb.display.drawImage(80-1-18, 1+8, ArrowUp_Push);
             gb.display.print(enText[32]);
             if(gb.buttons.released(BUTTON_UP) && PausedTimer == 0) {

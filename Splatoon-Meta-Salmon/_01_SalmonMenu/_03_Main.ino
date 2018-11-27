@@ -534,7 +534,7 @@ void loop () {
           if(gb.buttons.pressed(BUTTON_DOWN) && MissionReadIndex(3,0)) {
             AnimationTimer4=3;
           }
-          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(4,0)) {
+          if(gb.buttons.pressed(BUTTON_UP) && MissionReadIndex(5,0)) {
             AnimationTimer4=5;
           }
         } else

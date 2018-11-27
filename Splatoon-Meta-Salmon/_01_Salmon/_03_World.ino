@@ -245,7 +245,11 @@ class World {
       if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 0) {
         return Themes[0][1];
       } else if(Themes[Theme-1][1+TileGroup * TilesGroupCount + 25] == 1) {
-        return Themes[0][1+0 * TilesGroupCount + ((x%5) + (y%5) * 5)];
+        if(y-1 > MapHeight-(WaterLevel / 8)) {
+            return 0;
+        } else {
+            return Themes[0][1 + 0 * TilesGroupCount + ((x % 5) + (y % 5) * 5)];
+        }
       } else {
         return 0;
       }

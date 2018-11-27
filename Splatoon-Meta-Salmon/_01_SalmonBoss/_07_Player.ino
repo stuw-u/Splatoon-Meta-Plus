@@ -783,6 +783,7 @@ class Player :
             if(bulletsManager.bullets[i].color != PlayerColor) {
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
               Live-=bulletsManager.bullets[i].Damage;
+              hitAnim = 3;
               bulletsManager.bullets[i].Die();
 
               if(!isOffScreen() && Live > 0) {

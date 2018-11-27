@@ -784,6 +784,7 @@ class Player :
               particleManager.spawnParticle(Div8(bulletsManager.bullets[i].x),Div8(bulletsManager.bullets[i].y),0,colorGroup,bulletsManager.bullets[i].color);
               Live-=bulletsManager.bullets[i].Damage;
               bulletsManager.bullets[i].Die();
+              hitAnim = 3;
 
               if(!isOffScreen() && Live > 0) {
                 playSFX(2,0);
@@ -836,11 +837,12 @@ class Player :
         }
       } else if(RespawnTimer > 0) {
         RespawnTimer--;
+        vx = 0;
+        vy = 0;
         if(RespawnTimer == 0) {
+          slmKnock = true;
           x = world.GetSpawnPositionX();
           y = world.GetSpawnPositionY();
-          vx = 0;
-          vy = 0;
         }
         return;
       }

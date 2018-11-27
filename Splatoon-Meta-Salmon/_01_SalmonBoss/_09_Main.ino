@@ -43,7 +43,6 @@ void PrepareMap () {
   PausedTimer = -12;
   IsPaused = true;
 
-
   Background.setFrame(difficulty%2);
 }
 
@@ -83,6 +82,11 @@ void DrawCursor() {
     if(gb.buttons.repeat(BUTTON_DOWN,0)) {
       curY+=4;
       curY = constrain(curY, 0+5, LCDHEIGHT-4);
+    }
+    if(cameraX + curX > player.mainPlayer.x/8) {
+        player.mainPlayer.PlayerDir = 1;
+    } else {
+        player.mainPlayer.PlayerDir = -1;
     }
 
     if(IsPlaying) {
